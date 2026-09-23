@@ -16,8 +16,7 @@ point on the torus.}
 \value{
 Logical: \code{TRUE} if no row of \code{X} falls on the cut locus
   of \code{p_base}, \code{FALSE} otherwise. Stops with an error if
-  \code{p_base} has the wrong length. As a side effect, emits a warning if
-  the point is invalid, or a message if it is valid.
+  \code{p_base} has the wrong length.
 }
 \description{
 Checks that \code{p_base} has one coordinate per column of \code{X}, and

@@ -23,16 +23,27 @@
 #   cd examples && Rscript tripeptides.R
 # ================================================================
 
+# ---- Install missing packages ----
+for (pkg in c("ggplot2", "ggpubr", "parallel")) {
+    if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+}
+if (!requireNamespace("manifoldtest", quietly = TRUE)) {
+    install.packages("..", repos = NULL, type = "source")
+}
+
 library(manifoldtest)
 library(ggplot2)
 library(ggpubr)
+library(parallel)
 
 set_path <- 'data/tripeptides/'
 results_dir <- 'results'
 alpha <- 0.05
 R_perm <- 500
 n_top <- 50  # number of most abundant tripeptides used for the control test
+n_sub_max <- 1000  # cap on the per-pair subsample size in the control test
 seed <- 2024  # global random seed
+n_cores <- max(1, detectCores() - 1, na.rm = TRUE)  # workers for the parallel loops
 set.seed(seed)
 
 dir.create(results_dir, showWarnings = FALSE)
@@ -95,7 +106,8 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
     pvalues <- readRDS(h1_file)
 
 } else {
-
+    
+    cat("Loading and processing tripeptide data...\n")
     # ================================================================
     # 1. Load per-central-residue tripeptide data
     # ================================================================
@@ -153,9 +165,17 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
                                   pv_co=NA)
 
     colnames(pvalues_control)[1:2] <- c('trip_A', 'trip_B')
-    n_sub <- min(min(first_pv$n), 1000)
+    n_sub <- min(min(first_pv$n), n_sub_max)
 
-    for (trip_pair in seq_len(nrow(trip_pairs))) {
+    cat(sprintf("Performing control test on %d cores (%d pairs)...\n", n_cores, nrow(trip_pairs)))
+
+    cl <- makeCluster(n_cores)
+    clusterEvalQ(cl, library(manifoldtest))
+    clusterExport(cl, c("all_data", "first_pv", "trip_pairs", "n_sub",
+                        "subset_triplet", "to_torus", "test_both_modes", "R_perm", "seed"))
+    clusterSetRNGStream(cl, seed)
+
+    control_results <- parLapply(cl, seq_len(nrow(trip_pairs)), function(trip_pair) {
 
         trip_A <- first_pv[trip_pairs[trip_pair, 1], ]
         trip_B <- first_pv[trip_pairs[trip_pair, 2], ]
@@ -173,10 +193,11 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
         A_central <- to_torus(data_trip_A, 2)[sample(nrow(data_trip_A), n_sub), ]
         B_central <- to_torus(data_trip_B, 2)[sample(nrow(data_trip_B), n_sub), ]
 
-        pvalues_control[trip_pair, c("pv", "pv_co")] <- test_both_modes(A_central, B_central)
+        test_both_modes(A_central, B_central)
+    })
+    stopCluster(cl)
 
-        if (trip_pair %% 100 == 0) cat(sprintf("Control test: %d / %d pairs done\n", trip_pair, nrow(trip_pairs)))
-    }
+    pvalues_control[, c("pv", "pv_co")] <- do.call(rbind, control_results)
 
     saveRDS(pvalues_control, h0_file)
 
@@ -184,7 +205,15 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
     # 4. H1 test: central residue vs. left/right neighbor, within the same tripeptide
     # ================================================================
 
-    for (i_trip in seq_len(nrow(trip_list))) {
+    cat(sprintf("Performing H1 test on %d cores (%d triplets)...\n", n_cores, nrow(trip_list)))
+
+    cl <- makeCluster(n_cores)
+    clusterEvalQ(cl, library(manifoldtest))
+    clusterExport(cl, c("all_data", "trip_list", "subset_triplet", "to_torus",
+                        "test_both_modes", "R_perm", "seed"))
+    clusterSetRNGStream(cl, seed)
+
+    h1_results <- parLapply(cl, seq_len(nrow(trip_list)), function(i_trip) {
 
         central_name <- as.character(trip_list$Central[i_trip])
         data_trip <- subset_triplet(data_central=all_data[[central_name]],
@@ -196,24 +225,32 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
         left    <- to_torus(data_trip, 1)
         right   <- to_torus(data_trip, 3)
 
-        pvalues[i_trip, c("pv_left", "pv_left_co")]   <- test_both_modes(central, left)
-        pvalues[i_trip, c("pv_right", "pv_right_co")] <- test_both_modes(central, right)
+        c(test_both_modes(central, left), test_both_modes(central, right))
+    })
+    stopCluster(cl)
 
-        if (i_trip %% 50 == 0) cat(sprintf("H1 test: %d / %d triplets done\n", i_trip, nrow(trip_list)))
-    }
+    pvalues[, c("pv_left", "pv_left_co", "pv_right", "pv_right_co")] <- do.call(rbind, h1_results)
 
     saveRDS(pvalues, h1_file)
 }
 
 # ================================================================
-# 5. Summary and plots: raw tangent-space test vs. center-outward test
+# 5. Multiplicity correction, summary, and plots: raw vs. center-outward
 # ================================================================
 
-cat(sprintf("Rejection rate at alpha = %.2f:\n", alpha))
-cat(sprintf("  left,  raw:             %.1f%%\n", mean(pvalues$pv_left    < alpha, na.rm = TRUE) * 100))
-cat(sprintf("  left,  center-outward:  %.1f%%\n", mean(pvalues$pv_left_co < alpha, na.rm = TRUE) * 100))
-cat(sprintf("  right, raw:             %.1f%%\n", mean(pvalues$pv_right    < alpha, na.rm = TRUE) * 100))
-cat(sprintf("  right, center-outward:  %.1f%%\n", mean(pvalues$pv_right_co < alpha, na.rm = TRUE) * 100))
+pvalues_control$pv_adj    <- p.adjust(pvalues_control$pv,    method = "holm")
+pvalues_control$pv_co_adj <- p.adjust(pvalues_control$pv_co, method = "holm")
+
+pvalues$pv_left_adj     <- p.adjust(pvalues$pv_left,     method = "holm")
+pvalues$pv_left_co_adj  <- p.adjust(pvalues$pv_left_co,  method = "holm")
+pvalues$pv_right_adj    <- p.adjust(pvalues$pv_right,    method = "holm")
+pvalues$pv_right_co_adj <- p.adjust(pvalues$pv_right_co, method = "holm")
+
+cat(sprintf("Rejection rate at alpha = %.2f (Holm-adjusted):\n", alpha))
+cat(sprintf("  left,  raw:             %.1f%%\n", mean(pvalues$pv_left_adj    < alpha, na.rm = TRUE) * 100))
+cat(sprintf("  left,  center-outward:  %.1f%%\n", mean(pvalues$pv_left_co_adj < alpha, na.rm = TRUE) * 100))
+cat(sprintf("  right, raw:             %.1f%%\n", mean(pvalues$pv_right_adj    < alpha, na.rm = TRUE) * 100))
+cat(sprintf("  right, center-outward:  %.1f%%\n", mean(pvalues$pv_right_co_adj < alpha, na.rm = TRUE) * 100))
 
 #' Stack a (raw, center-outward) p-value pair into a long data frame for plotting
 to_long <- function(pv_raw, pv_co) {
@@ -226,20 +263,20 @@ ecdf_plot <- function(data_long, subtitle, title) {
     ggplot(data_long, aes(x = pv, color = method)) +
         stat_ecdf(linewidth = 1) +
         geom_abline(linetype = 'dashed', color = 'darkblue') +
-        labs(x = 'p-value', y = 'ECDF', color = 'Test', subtitle = subtitle) +
+        labs(x = 'Holm-adjusted p-value', y = 'ECDF', color = 'Test', subtitle = subtitle) +
         ggtitle(title) +
         theme_bw()
 }
 
-p1 <- ecdf_plot(to_long(pvalues_control$pv, pvalues_control$pv_co),
+p1 <- ecdf_plot(to_long(pvalues_control$pv_adj, pvalues_control$pv_co_adj),
                 'Testing independence between structures of different tripeptides',
                 'p-value distribution under the null')
 
-p2 <- ecdf_plot(to_long(pvalues$pv_left, pvalues$pv_left_co),
+p2 <- ecdf_plot(to_long(pvalues$pv_left_adj, pvalues$pv_left_co_adj),
                 'Testing independence between the structures of central and left amino-acids',
                 'p-value distribution under a fixed alternative')
 
-p3 <- ecdf_plot(to_long(pvalues$pv_right, pvalues$pv_right_co),
+p3 <- ecdf_plot(to_long(pvalues$pv_right_adj, pvalues$pv_right_co_adj),
                 'Testing independence between the structures of central and right amino-acids',
                 'p-value distribution under a fixed alternative')
 

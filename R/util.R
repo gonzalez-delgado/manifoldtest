@@ -60,8 +60,7 @@ align_sample_sizes <- function(X_raw, Y_raw, seed = 2024) {
 #'
 #' @return Logical: \code{TRUE} if no row of \code{X} falls on the cut locus
 #'   of \code{p_base}, \code{FALSE} otherwise. Stops with an error if
-#'   \code{p_base} has the wrong length. As a side effect, emits a warning if
-#'   the point is invalid, or a message if it is valid.
+#'   \code{p_base} has the wrong length.
 #'
 #' @examples
 #' X <- matrix(runif(20), nrow = 10, ncol = 2)
@@ -78,8 +77,6 @@ is_valid <- function(X, p_base) {
     n_cut <- sum(cut_locus_idx)
     if (n_cut > 0) {
         warning(sprintf("%d samples detected on the cut locus. Consider modifying the base point.", n_cut))
-    } else {
-        message("No sample detected on the cut locus.")
     }
 
     invisible(n_cut == 0)
