@@ -46,123 +46,99 @@ align_sample_sizes <- function(X_raw, Y_raw, seed = 2024) {
     return(list(X = X, Y = Y))
 }
 
-
-#' Check whether a base point is valid for a torus data set
+#' Find a base point via multi-start optimization
 #'
-#' Checks that \code{p_base} has one coordinate per column of \code{X}, and
-#' warns if any row of \code{X} lies on the cut locus of \code{p_base}, where
-#' the inverse exponential map is undefined.
+#' Manifold-agnostic search for a data-centered base point: numerically
+#' minimizes the total geodesic distance \code{sum(dist(X, p))} from a
+#' candidate point \code{p} to every row of \code{X}, via multi-start
+#' \code{\link[stats]{optim}} (L-BFGS-B, falling back to Nelder-Mead if it
+#' errors). The manifold enters only through \code{dist} and through the
+#' search space, which is described by \code{init}, \code{in_domain},
+#' \code{lower}, \code{upper} and \code{project}. See
+#' \code{\link{optimize_base_point_torus}} for the torus case.
 #'
-#' @param X A matrix or data frame of torus data in \eqn{[0,1)^d}; rows are
-#'   samples, columns are coordinates.
-#' @param p_base Numeric vector of length \code{ncol(X)} giving the base
-#'   point on the torus.
+#' @param X A matrix or data frame of manifold data; rows are samples,
+#'   columns are coordinates.
+#' @param dist Function \code{f(X, p)} returning the vector of geodesic
+#'   distances between each row of \code{X} and \code{p} (see
+#'   \code{\link{new_manifold}}).
+#' @param init Function \code{f(n)} returning a matrix whose \code{n} rows
+#'   are the restart points. It is called after \code{set.seed(seed)}.
+#' @param in_domain Function \code{f(p)} returning \code{TRUE} if \code{p}
+#'   is an admissible candidate; the objective is \code{Inf} otherwise.
+#'   Defaults to accepting every \code{p}.
+#' @param lower,upper Bounds on \code{p} passed to
+#'   \code{\link[stats]{optim}} for L-BFGS-B. Default to \code{-Inf} and
+#'   \code{Inf} (unconstrained).
+#' @param project Function \code{f(p)} applied to the best point found,
+#'   e.g. to map it back onto the manifold. Defaults to
+#'   \code{\link[base]{identity}}.
+#' @param n_start Number of random restarts used to avoid local minima of
+#'   the (non-convex) objective. Defaults to 10.
+#' @param maxit Maximum number of \code{\link[stats]{optim}} iterations per
+#'   restart. Defaults to 200.
+#' @param seed Integer random seed used to generate the restart points, for
+#'   reproducibility. Defaults to 42.
 #'
-#' @return Logical: \code{TRUE} if no row of \code{X} falls on the cut locus
-#'   of \code{p_base}, \code{FALSE} otherwise. Stops with an error if
-#'   \code{p_base} has the wrong length.
+#' @return A list with three elements: \code{p} (the best point found
+#'   across all restarts, after \code{project}), \code{value} (its total
+#'   distance to the rows of \code{X}), and \code{convergence} (the
+#'   \code{\link[stats]{optim}} convergence code of the best restart;
+#'   \code{0} indicates successful convergence).
 #'
 #' @examples
 #' X <- matrix(runif(20), nrow = 10, ncol = 2)
-#' is_valid(X, p_base = c(0, 0))
+#' optimize_base_point(X, dist = dist_torus,
+#'                     init = function(n) matrix(runif(2 * n), ncol = 2),
+#'                     lower = c(0, 0), upper = c(1, 1), n_start = 5)
 #'
 #' @export
-is_valid <- function(X, p_base) {
+optimize_base_point <- function(X, dist, init, in_domain = function(p) TRUE,
+                                lower = -Inf, upper = Inf, project = identity,
+                                n_start = 10, maxit = 200, seed = 42) {
 
-    if (length(p_base) != ncol(X)) {
-        stop(sprintf("The length of p_base (%d) mismatches the number of columns of X (%d)!", length(p_base), ncol(X)))
+    X <- as.matrix(X)
+
+    # Objective: total distance to the data, infinite outside the domain
+    objective <- function(p) {
+        if (!in_domain(p)) return(Inf)
+        sum(dist(X, p))
     }
 
-    cut_locus_idx <- apply(X, 1, function(row) any(abs( (row - p_base) %% 1 - 0.5 )  < 1e-12))
-    n_cut <- sum(cut_locus_idx)
-    if (n_cut > 0) {
-        warning(sprintf("%d samples detected on the cut locus. Consider modifying the base point.", n_cut))
+    best_p <- NULL
+    best_val <- Inf
+    best_convergence <- NA_integer_
+
+    set.seed(seed)
+    init_points <- as.matrix(init(n_start))
+    if (nrow(init_points) != n_start) {
+        stop(sprintf("init(%d) returned %d restart points instead of %d.", n_start, nrow(init_points), n_start))
     }
 
-    invisible(n_cut == 0)
+    for (k in seq_len(n_start)) {
+
+        start <- init_points[k, ]
+        # Use the L-BFGS-B method to handle bounds; fall back to Nelder-Mead if it errors
+        opt <- tryCatch(
+            stats::optim(par = start,
+                fn = objective,
+                method = "L-BFGS-B",
+                lower = lower,
+                upper = upper,
+                control = list(maxit = maxit)),
+            error = function(e) {
+                stats::optim(par = start,
+                    fn = objective,
+                    method = "Nelder-Mead",
+                    control = list(maxit = maxit))
+            }
+        )
+        if (opt$value < best_val) {
+            best_val <- opt$value
+            best_p <- opt$par
+            best_convergence <- opt$convergence
+        }
+    }
+
+    list(p = project(best_p), value = best_val, convergence = best_convergence)
 }
-
-#' Total torus distance from a candidate point to a data set
-#'
-#' Computes the sum, over every row of \code{X}, of the flat-torus distance
-#' between that row and the candidate point \code{p}: for each coordinate,
-#' the shortest wraparound distance \code{min(|x-p|, 1-|x-p|)} on the unit
-#' circle, combined across coordinates via the usual Euclidean norm.
-#'
-#' @param p Numeric vector of length \code{ncol(X)}: the candidate point on
-#'   the torus \eqn{[0,1)^d}.
-#' @param X A numeric matrix of torus data in \eqn{[0,1)^d}; rows are
-#'   samples, columns are coordinates.
-#'
-#' @return A single number: the total torus distance from \code{p} to every
-#'   row of \code{X}, or \code{Inf} if any coordinate of \code{p} falls
-#'   outside \eqn{[0,1]}.
-#'
-#' @examples
-#' X <- matrix(runif(20), nrow = 10, ncol = 2)
-#' torus_dist_sum(c(0.5, 0.5), X)
-#'
-#' @export
-torus_dist_sum <- function(p, X) {
-
-    if (any(p < 0 | p > 1)) return(Inf)
-    diff <- abs(sweep(X, 2, p))
-    diff <- pmin(diff, 1 - diff)
-    sum(sqrt(rowSums(diff^2)))
-}
-
-#' Check that data lies in the torus representation [0,1)^d
-#'
-#' Checks whether every value of \code{X} lies in \eqn{[0,1)}, the torus
-#' representation expected throughout this package (see
-#' \code{\link{log_map}}, \code{\link{is_valid}},
-#' \code{\link{torus_dist_sum}}).
-#'
-#' @param X A matrix or data frame of (nominally) torus data.
-#'
-#' @return Logical: \code{TRUE} if every value of \code{X} lies in
-#'   \eqn{[0,1)}, \code{FALSE} otherwise.
-#'
-#' @examples
-#' X <- matrix(runif(20), nrow = 10, ncol = 2)
-#' is_in_torus(X)
-#'
-#' Y <- matrix(rnorm(20), nrow = 10, ncol = 2)  # not in [0,1)
-#' is_in_torus(Y)
-#'
-#' @export
-is_in_torus <- function(X) {
-
-    return(all(X >= 0 & X < 1))
-
-}
-
-#' Map torus data to the tangent space at a base point
-#'
-#' Applies the logarithmic map to send torus data in \eqn{[0,1)^d}
-#' into the tangent space \eqn{(-0.5, 0.5]^d} at base point \code{p}: for
-#' each coordinate, \code{(x - p + 0.5) \%\% 1 - 0.5}, i.e. the shortest
-#' signed offset from \code{p} on that coordinate's circle. Points on the
-#' cut locus of \code{p} map to the boundary of \eqn{(-0.5, 0.5]^d}; see
-#' \code{\link{is_valid}}.
-#'
-#' @param X_torus A matrix or data frame of torus data in \eqn{[0,1)^d};
-#'   rows are samples, columns are coordinates.
-#' @param p Numeric vector of length \code{ncol(X_torus)}: the base point on
-#'   the torus.
-#'
-#' @return A numeric matrix of the same shape as \code{X_torus}, with values
-#'   in \eqn{(-0.5, 0.5]^d}.
-#'
-#' @examples
-#' X <- matrix(runif(20), nrow = 10, ncol = 2)
-#' log_map(X, p = c(0.5, 0.5))
-#'
-#' @export
-log_map <- function(X_torus, p) {
-
-    X_torus <- as.matrix(X_torus)
-    ((sweep(X_torus, 2, p) + 0.5) %% 1) - 0.5
-
-}
-

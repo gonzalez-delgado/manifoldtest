@@ -1,0 +1,61 @@
+url: https://gonzalez-delgado.github.io/manifoldtest/
+template:
+  bootstrap: 5
+  math-rendering: katex
+  bslib:
+    pkgdown-nav-height: 100px
+search:
+  exclude: []
+toc:
+  depth: 2
+home:
+  sidebar:
+    html: pkgdown/sidebar.html
+navbar:
+  structure:
+    left:
+    - home
+    - api
+    right:
+    - search
+    - github
+  components:
+    api:
+      text: API reference
+      href: reference/index.html
+reference:
+- subtitle: Independence test
+  desc: Distance covariance independence test for manifold-valued data.
+  contents:
+  - manifold.dcov.test
+- subtitle: Manifolds
+  desc: Definition and retrieval of the manifolds supported by the package.
+  contents:
+  - new_manifold
+  - get_manifold
+  - manifold_torus
+- subtitle: Base point selection
+  desc: Manifold-agnostic choice of the base point of the logarithmic map.
+  contents:
+  - choose_base_point
+  - optimize_base_point
+- subtitle: Torus
+  desc: Geometry of the flat torus, with points represented in [0,1)^d.
+  contents:
+  - is_in_torus
+  - log_map_torus
+  - dist_torus
+  - is_valid_torus
+  - auto_base_point_torus
+  - optimize_base_point_torus
+  - largest_gap_point_torus
+- subtitle: Center-outward transform
+  desc: Multidimensional ranks in the unit ball (Hallin et al. 2021).
+  contents:
+  - center_outward_transform
+  - build_ball_grid
+  - optimal_assignment
+- subtitle: Utilities
+  desc: Helper functions for data preparation.
+  contents:
+  - align_sample_sizes

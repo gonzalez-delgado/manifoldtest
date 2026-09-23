@@ -117,7 +117,7 @@ optimal_assignment <- function(Z, grid) {
 #' test) requires no moment condition on the original data.
 #'
 #' @param Z Numeric matrix (\code{n} x \code{d}): Euclidean data, typically
-#'   the output of \code{\link{log_map}}.
+#'   the output of a manifold log map (e.g. \code{\link{log_map_torus}}).
 #' @param seed Integer random seed passed to \code{\link{build_ball_grid}}
 #'   for the grid's quasi-uniform directions (only used when \code{d > 2}).
 #'   Defaults to \code{42}.

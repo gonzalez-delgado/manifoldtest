@@ -2,7 +2,7 @@
 # tripeptides.R
 # -----------------------------------------------------------------
 # Independence testing on tripeptide backbone dihedral angles, using
-# torus.dcov.test() from the manifoldtest package.
+# manifold.dcov.test() from the manifoldtest package.
 #
 # For each central amino acid, (Left, Central, Right) tripeptides
 # are formed from the surrounding residues. Backbone dihedral angles
@@ -14,7 +14,7 @@
 #     is tested against its left and right neighbors' structure, where
 #     dependence is expected.
 #
-# Each test is run twice via torus.dcov.test(): once with
+# Each test is run twice via manifold.dcov.test(): once with
 # center_outward = FALSE (raw tangent-space coordinates) and once with
 # center_outward = TRUE (center-outward rank transform), to compare the
 # two testing approaches.
@@ -24,7 +24,7 @@
 # ================================================================
 
 # ---- Install missing packages ----
-for (pkg in c("ggplot2", "ggpubr", "parallel")) {
+for (pkg in c("ggplot2", "ggpubr", "parallel", "pbapply")) {
     if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
 }
 if (!requireNamespace("manifoldtest", quietly = TRUE)) {
@@ -35,6 +35,8 @@ library(manifoldtest)
 library(ggplot2)
 library(ggpubr)
 library(parallel)
+library(pbapply)
+pboptions(type = "timer")  # show the progress bar under Rscript too (off by default when non-interactive)
 
 set_path <- 'data/tripeptides/'
 results_dir <- 'results'
@@ -43,7 +45,7 @@ R_perm <- 500
 n_top <- 50  # number of most abundant tripeptides used for the control test
 n_sub_max <- 1000  # cap on the per-pair subsample size in the control test
 seed <- 2024  # global random seed
-n_cores <- max(1, detectCores() - 1, na.rm = TRUE)  # workers for the parallel loops
+n_cores <- 3 # max(1, detectCores() - 1, na.rm = TRUE)  # workers for the parallel loops
 set.seed(seed)
 
 dir.create(results_dir, showWarnings = FALSE)
@@ -68,45 +70,44 @@ subset_triplet <- function(data_central, left, central, right) {
                  data_central$Res3 == right, ]
 }
 
-#' Rescale a residue's (Phi, Psi) dihedral angles from (-pi, pi] to [0,1)^2
+#' Rescale a residue's (Phi, Psi) dihedral angles from (-pi, pi] to [0,1)^2.
+#' The final %% 1 wraps angles stored slightly above pi (e.g. pi in single
+#' precision) back into [0,1), where they belong since angles are periodic.
 to_torus <- function(data_trip, residue) {
     cols <- c(paste0("Phi_res_", residue), paste0("Psi_res_", residue))
-    (data_trip[, cols] + pi) / (2 * pi)
+    ((data_trip[, cols] + pi) / (2 * pi)) %% 1
 }
 
-#' Run torus.dcov.test() in both modes and return a named p-value vector
+#' Run manifold.dcov.test() in both modes and return a named p-value vector
 test_both_modes <- function(X, Y) {
 
-    raw <- torus.dcov.test(X=X,
-                          Y=Y,
-                          R=R_perm,
-                          seed=seed,
-                          center_outward=FALSE,
-                          verbose=FALSE)
+    raw <- manifold.dcov.test(X=X,
+                             Y=Y,
+                             manifold="torus",
+                             R=R_perm,
+                             seed=seed,
+                             center_outward=FALSE,
+                             verbose=FALSE)
 
-    co  <- torus.dcov.test(X=X,
-                          Y=Y,
-                          R=R_perm,
-                          seed=seed,
-                          center_outward=TRUE,
-                          verbose=FALSE)
+    co  <- manifold.dcov.test(X=X,
+                             Y=Y,
+                             manifold="torus",
+                             R=R_perm,
+                             seed=seed,
+                             center_outward=TRUE,
+                             verbose=FALSE)
 
     c(raw = raw$dcov_test$p.value, co = co$dcov_test$p.value)
 }
 
-if (file.exists(h0_file) && file.exists(h1_file)) {
+# Each test's results are cached in its own file, so only the missing ones
+# are computed and plots can be reformatted without rerunning the
+# (expensive) tests.
+h0_cached <- file.exists(h0_file)
+h1_cached <- file.exists(h1_file)
 
-    # ================================================================
-    # Cached results found: load them instead of recomputing, so plots
-    # can be reformatted without rerunning the (expensive) tests.
-    # ================================================================
+if (!h0_cached || !h1_cached) {
 
-    cat(sprintf("Found cached results in '%s'; loading instead of recomputing.\n", results_dir))
-    pvalues_control <- readRDS(h0_file)
-    pvalues <- readRDS(h1_file)
-
-} else {
-    
     cat("Loading and processing tripeptide data...\n")
     # ================================================================
     # 1. Load per-central-residue tripeptide data
@@ -131,11 +132,11 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
     # ================================================================
 
     pvalues <- data.frame(trip_list,
-                          n = NA,
-                          pv_left = NA,
-                          pv_left_co = NA,
-                          pv_right = NA,
-                          pv_right_co = NA)
+                             n = NA,
+                             pv_left = NA,
+                             pv_left_co = NA,
+                             pv_right = NA,
+                             pv_right_co = NA)
 
     for (i_trip in seq_len(nrow(trip_list))) {
 
@@ -151,13 +152,21 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
     keep <- pvalues$n > 100
     pvalues <- pvalues[keep, ]
     trip_list <- trip_list[keep, ]
+}
+
+if (h0_cached) {
+
+    cat(sprintf("Found cached control (H0) results in '%s'; loading instead of recomputing.\n", h0_file))
+    pvalues_control <- readRDS(h0_file)
+
+} else {
 
     # ================================================================
     # 3. Control test (H0): (Left', Central', Right') independent of (Left, Central, Right)
     # ================================================================
 
-    pvalues <- pvalues[order(pvalues$n, decreasing = TRUE), ]
-    first_pv <- pvalues[1:n_top, ]
+    # Sort a copy only: pvalues must stay row-aligned with trip_list for the H1 test
+    first_pv <- pvalues[order(pvalues$n, decreasing = TRUE), ][1:n_top, ]
     trip_pairs <- t(combn(1:n_top, 2))
 
     pvalues_control <- data.frame(trip_pairs,
@@ -175,7 +184,7 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
                         "subset_triplet", "to_torus", "test_both_modes", "R_perm", "seed"))
     clusterSetRNGStream(cl, seed)
 
-    control_results <- parLapply(cl, seq_len(nrow(trip_pairs)), function(trip_pair) {
+    control_results <- pblapply(seq_len(nrow(trip_pairs)), function(trip_pair) {
 
         trip_A <- first_pv[trip_pairs[trip_pair, 1], ]
         trip_B <- first_pv[trip_pairs[trip_pair, 2], ]
@@ -194,12 +203,20 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
         B_central <- to_torus(data_trip_B, 2)[sample(nrow(data_trip_B), n_sub), ]
 
         test_both_modes(A_central, B_central)
-    })
+    }, cl = cl)
     stopCluster(cl)
 
     pvalues_control[, c("pv", "pv_co")] <- do.call(rbind, control_results)
 
     saveRDS(pvalues_control, h0_file)
+}
+
+if (h1_cached) {
+
+    cat(sprintf("Found cached H1 results in '%s'; loading instead of recomputing.\n", h1_file))
+    pvalues <- readRDS(h1_file)
+
+} else {
 
     # ================================================================
     # 4. H1 test: central residue vs. left/right neighbor, within the same tripeptide
@@ -213,7 +230,7 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
                         "test_both_modes", "R_perm", "seed"))
     clusterSetRNGStream(cl, seed)
 
-    h1_results <- parLapply(cl, seq_len(nrow(trip_list)), function(i_trip) {
+    h1_results <- pblapply(seq_len(nrow(trip_list)), function(i_trip) {
 
         central_name <- as.character(trip_list$Central[i_trip])
         data_trip <- subset_triplet(data_central=all_data[[central_name]],
@@ -226,7 +243,7 @@ if (file.exists(h0_file) && file.exists(h1_file)) {
         right   <- to_torus(data_trip, 3)
 
         c(test_both_modes(central, left), test_both_modes(central, right))
-    })
+    }, cl = cl)
     stopCluster(cl)
 
     pvalues[, c("pv_left", "pv_left_co", "pv_right", "pv_right_co")] <- do.call(rbind, h1_results)

@@ -2,14 +2,14 @@
 # trinucleotides.R
 # -----------------------------------------------------------------
 # Independence testing on RNA trinucleotide torsion angles, using
-# torus.dcov.test() from the manifoldtest package.
+# manifold.dcov.test() from the manifoldtest package.
 #
 # For each trinucleotide type present in the data, the sugar-pucker
 # angles X = (nu0, nu1, nu2) are tested for independence against
 # Y = (nu3, nu4). Angles are in degrees in [0, 360) and
 # are rescaled to [0,1)^d.
 #
-# Each test is run twice via torus.dcov.test(): once with
+# Each test is run twice via manifold.dcov.test(): once with
 # center_outward = FALSE (raw tangent-space coordinates) and once with
 # center_outward = TRUE (center-outward rank transform), to compare the
 # two testing approaches. p-values are Holm-Bonferroni corrected across
@@ -21,7 +21,7 @@
 # ================================================================
 
 # ---- Install missing packages ----
-for (pkg in c("parallel", "reticulate")) {
+for (pkg in c("parallel", "pbapply", "reticulate")) {
     if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
 }
 if (!requireNamespace("manifoldtest", quietly = TRUE)) {
@@ -32,6 +32,8 @@ if (!requireNamespace("manifoldtest", quietly = TRUE)) {
 
 library(manifoldtest)
 library(parallel)
+library(pbapply)
+pboptions(type = "timer")  # show the progress bar under Rscript too (off by default when non-interactive)
 
 data_path <- 'data/nucleotides.npy'
 results_dir <- 'results'
@@ -53,22 +55,24 @@ to_torus <- function(data_trinuc, cols) {
     (data_trinuc[, cols] %% 360) / 360
 }
 
-#' Run torus.dcov.test() in both modes and return a named p-value vector
+#' Run manifold.dcov.test() in both modes and return a named p-value vector
 test_both_modes <- function(X, Y) {
 
-    raw <- torus.dcov.test(X=X,
-                          Y=Y,
-                          R=R_perm,
-                          seed=seed,
-                          center_outward=FALSE,
-                          verbose=FALSE)
+    raw <- manifold.dcov.test(X=X,
+                             Y=Y,
+                             manifold="torus",
+                             R=R_perm,
+                             seed=seed,
+                             center_outward=FALSE,
+                             verbose=FALSE)
 
-    co  <- torus.dcov.test(X=X,
-                          Y=Y,
-                          R=R_perm,
-                          seed=seed,
-                          center_outward=TRUE,
-                          verbose=FALSE)
+    co  <- manifold.dcov.test(X=X,
+                             Y=Y,
+                             manifold="torus",
+                             R=R_perm,
+                             seed=seed,
+                             center_outward=TRUE,
+                             verbose=FALSE)
 
     c(raw = raw$dcov_test$p.value, co = co$dcov_test$p.value)
 }
@@ -108,21 +112,21 @@ if (file.exists(pv_file)) {
     clusterExport(cl, c("rna_data", "to_torus", "test_both_modes", "R_perm", "seed"))
     clusterSetRNGStream(cl, seed)
 
-    results <- parLapply(cl, trinuc_list, function(trinuc) {
+    results <- pblapply(trinuc_list, function(trinuc) {
 
         data_trinuc <- rna_data[[trinuc]]
         X <- to_torus(data_trinuc, c('nu0', 'nu1', 'nu2'))
         Y <- to_torus(data_trinuc, c('nu3', 'nu4'))
         c(n = nrow(data_trinuc), test_both_modes(X, Y))
 
-    })
+    }, cl = cl)
     stopCluster(cl)
 
     res_mat <- do.call(rbind, results)
     pvalues <- data.frame(trinucleotide = trinuc_list,
-                          n = res_mat[, "n"],
-                          pv = res_mat[, "raw"],
-                          pv_co = res_mat[, "co"])
+                             n = res_mat[, "n"],
+                             pv = res_mat[, "raw"],
+                             pv_co = res_mat[, "co"])
 
     saveRDS(pvalues, pv_file)
 }

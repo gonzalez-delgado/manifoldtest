@@ -6,66 +6,71 @@
 \usage{
 choose_base_point(
   X,
-  method = c("auto", "optimize"),
+  manifold = "torus",
+  method = NULL,
   n_start = 10,
   maxit = 200,
   seed = 42
 )
 }
 \arguments{
-\item{X}{A matrix or data frame of torus data in \eqn{[0,1)^d}; rows are
-samples, columns are coordinates.}
+\item{X}{A matrix or data frame of manifold data; rows are samples,
+columns are coordinates.}
 
-\item{method}{Either \code{"auto"} (the default) or \code{"optimize"};
-see above.}
+\item{manifold}{The manifold \code{X} lies on: a name accepted by
+\code{\link{get_manifold}} (currently only \code{"torus"}, the
+default) or an object created with \code{\link{new_manifold}}.}
 
-\item{n_start}{Number of random restarts for \code{method = "optimize"},
-used to avoid local minima of the (non-convex) objective. Defaults to
-10. Ignored for \code{method = "auto"}.}
+\item{method}{Name of one of the manifold's base point methods. If
+\code{NULL} (the default), the manifold's first (default) method is
+used, i.e. \code{"auto"} for the torus.}
+
+\item{n_start}{Number of random restarts for iterative methods (e.g.
+\code{"optimize"}), used to avoid local minima of the objective.
+Defaults to 10. Ignored by methods that do not use it.}
 
 \item{maxit}{Maximum number of \code{\link[stats]{optim}} iterations per
-restart, for \code{method = "optimize"}. Defaults to 200. Ignored for
-\code{method = "auto"}.}
+restart, for iterative methods. Defaults to 200. Ignored by methods
+that do not use it.}
 
-\item{seed}{Integer random seed used to generate the restart points, for
-\code{method = "optimize"}. Defaults to 42. Ignored for
-\code{method = "auto"}.}
+\item{seed}{Integer random seed for iterative methods. Defaults to 42.
+Ignored by methods that do not use it.}
 }
 \value{
 A list with three elements:
-  \item{p}{Numeric vector of length \code{ncol(X)}: the chosen base
-    point, clamped to \eqn{[0,1]^d}.}
-  \item{value}{The total torus distance from \code{p} to every row of
-    \code{X} (\code{\link{torus_dist_sum}}), computed for either method
-    so the two are comparable. Lower means \code{p} is more central.}
-  \item{convergence}{For \code{method = "optimize"}, the
+  \item{p}{The chosen base point.}
+  \item{value}{The total geodesic distance from \code{p} to every row of
+    \code{X}, computed with the manifold's \code{dist} for every method
+    so they are comparable. Lower means \code{p} is more central.}
+  \item{convergence}{For iterative methods, the
     \code{\link[stats]{optim}} convergence code of the best restart
     (\code{0} indicates successful convergence). \code{NA} for
-    \code{method = "auto"}, which involves no iterative optimization.}
+    non-iterative methods such as \code{"auto"}.}
 
-  Stops with an error (checked via \code{\link{is_valid}}) if the chosen
-  \code{p} happens to land on the cut locus of some row of \code{X}: for
-  \code{method = "optimize"} this suggests a higher \code{n_start},
-  while for \code{method = "auto"} it should not happen (up to
-  floating-point tolerance) and indicates degenerate data.
+  Stops with an error if the chosen \code{p} happens to land on the cut
+  locus of some row of \code{X}: for \code{method = "optimize"} this
+  suggests a higher \code{n_start}, while for the torus \code{method =
+  "auto"} it should not happen (up to floating-point tolerance) and
+  indicates degenerate data.
 }
 \description{
-Finds a base point \code{p} on the torus \eqn{[0,1)^d} for \code{X},
-using one of two methods:
+Finds a base point \code{p} on the manifold for \code{X}, using one of
+the base point methods provided by the manifold (see
+\code{\link{new_manifold}}), then validates it with the manifold's
+cut-locus check (\code{is_valid}). For the torus
+(\code{\link{manifold_torus}}) the methods are:
 \itemize{
   \item \code{"auto"} (the default): the closed-form, per-coordinate
-    maximal-gap method (\code{\link{auto_base_point}}), which is
+    maximal-gap method (\code{\link{auto_base_point_torus}}), which is
     \emph{not} centered on the data, but is guaranteed to avoid the cut
     locus of \code{X} by construction, and is much cheaper to compute.
-  \item \code{"optimize"}: numerically minimizes
-    \code{\link{torus_dist_sum}}, the total torus distance from
-    \code{p} to every row of \code{X} (a geometric-median-style,
-    data-centered point), via multi-start \code{\link[stats]{optim}}.
+  \item \code{"optimize"}: numerically minimizes the total torus
+    distance from \code{p} to every row of \code{X} (a
+    geometric-median-style, data-centered point), via multi-start
+    \code{\link[stats]{optim}} (\code{\link{optimize_base_point_torus}}).
     Cut-locus avoidance is checked afterward, not guaranteed by
     construction.
 }
-Either way, the chosen point is validated with \code{\link{is_valid}}
-before being returned.
 }
 \examples{
 X <- matrix(stats::runif(20), nrow = 10, ncol = 2)
