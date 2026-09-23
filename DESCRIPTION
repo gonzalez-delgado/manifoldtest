@@ -1,0 +1,25 @@
+Package: manifoldtest
+Type: Package
+Title: Independence Testing for Torus-Valued Data
+Version: 0.1.0
+Authors@R: person("Javier", "González-Delgado", email = "javiergonde@gmail.com",
+    role = c("aut", "cre"))
+Description: Tools for testing statistical independence between samples of
+    torus-valued data (e.g. angular or periodic measurements). Data are
+    mapped from the flat torus to a Euclidean tangent space via a
+    logarithmic (inverse exponential) map at a chosen base point, optionally
+    transformed to multidimensional ranks bounded in the unit ball via the
+    center-outward distribution function of Hallin et al. (2021), and then
+    tested for independence with the classical distance covariance test of
+    Szekely, Rizzo and Bakirov (2007).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.0.0)
+Imports:
+    stats,
+    transport,
+    energy
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.3.3
