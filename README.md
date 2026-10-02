@@ -1,5 +1,6 @@
-# manifoldtest
-Independence test on a complete Riemannian manifold
+# manifoldtest <img src="man/figures/logo.png" align="right" height="139" alt="" />
+
+Independence test on a complete Riemannian manifold.
 
 ## Installation
 
