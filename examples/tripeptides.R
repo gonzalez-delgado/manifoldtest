@@ -19,6 +19,9 @@
 # center_outward = TRUE (center-outward rank transform), to compare the
 # two testing approaches.
 #
+# To automatically download the data, run the shell script examples/data/build_tripeptides.sh
+# Then, run this script from the examples/ directory to perform the tests and generate the plots with results.
+#
 # Usage:
 #   cd examples && Rscript tripeptides.R
 # ================================================================
@@ -252,50 +255,35 @@ if (h1_cached) {
 }
 
 # ================================================================
-# 5. Multiplicity correction, summary, and plots: raw vs. center-outward
+# 5. Plots: raw vs. center-outward
 # ================================================================
 
-pvalues_control$pv_adj    <- p.adjust(pvalues_control$pv,    method = "holm")
-pvalues_control$pv_co_adj <- p.adjust(pvalues_control$pv_co, method = "holm")
-
-pvalues$pv_left_adj     <- p.adjust(pvalues$pv_left,     method = "holm")
-pvalues$pv_left_co_adj  <- p.adjust(pvalues$pv_left_co,  method = "holm")
-pvalues$pv_right_adj    <- p.adjust(pvalues$pv_right,    method = "holm")
-pvalues$pv_right_co_adj <- p.adjust(pvalues$pv_right_co, method = "holm")
-
-cat(sprintf("Rejection rate at alpha = %.2f (Holm-adjusted):\n", alpha))
-cat(sprintf("  left,  raw:             %.1f%%\n", mean(pvalues$pv_left_adj    < alpha, na.rm = TRUE) * 100))
-cat(sprintf("  left,  center-outward:  %.1f%%\n", mean(pvalues$pv_left_co_adj < alpha, na.rm = TRUE) * 100))
-cat(sprintf("  right, raw:             %.1f%%\n", mean(pvalues$pv_right_adj    < alpha, na.rm = TRUE) * 100))
-cat(sprintf("  right, center-outward:  %.1f%%\n", mean(pvalues$pv_right_co_adj < alpha, na.rm = TRUE) * 100))
 
 #' Stack a (raw, center-outward) p-value pair into a long data frame for plotting
 to_long <- function(pv_raw, pv_co) {
-    rbind(data.frame(pv = pv_raw, method = "raw"),
-          data.frame(pv = pv_co,  method = "center-outward"))
+    rbind(data.frame(pv = pv_raw, method = "DistCov"),
+          data.frame(pv = pv_co,  method = "Center-outward + DistCov"))
 }
 
-ecdf_plot <- function(data_long, subtitle, title) {
+ecdf_plot <- function(data_long, title) {
 
     ggplot(data_long, aes(x = pv, color = method)) +
         stat_ecdf(linewidth = 1) +
         geom_abline(linetype = 'dashed', color = 'darkblue') +
-        labs(x = 'Holm-adjusted p-value', y = 'ECDF', color = 'Test', subtitle = subtitle) +
+        labs(x = expression(italic(p) * '-value'), y = 'ECDF', color = 'Method') +
         ggtitle(title) +
-        theme_bw()
+        theme_bw(base_size = 18) +
+        theme(plot.title = element_text(size = rel(1)))
 }
 
-p1 <- ecdf_plot(to_long(pvalues_control$pv_adj, pvalues_control$pv_co_adj),
-                'Testing independence between structures of different tripeptides',
-                'p-value distribution under the null')
+p1 <- ecdf_plot(to_long(pvalues_control$pv, pvalues_control$pv_co),
+                'Different tripeptides (H\u2080)')
 
-p2 <- ecdf_plot(to_long(pvalues$pv_left_adj, pvalues$pv_left_co_adj),
-                'Testing independence between the structures of central and left amino-acids',
-                'p-value distribution under a fixed alternative')
+p2 <- ecdf_plot(to_long(pvalues$pv_left, pvalues$pv_left_co),
+                'Central vs. left (H\u2081)')
 
-p3 <- ecdf_plot(to_long(pvalues$pv_right_adj, pvalues$pv_right_co_adj),
-                'Testing independence between the structures of central and right amino-acids',
-                'p-value distribution under a fixed alternative')
+p3 <- ecdf_plot(to_long(pvalues$pv_right, pvalues$pv_right_co),
+                'Central vs. right (H\u2081)')
 
-p_all <- ggarrange(p1, p2, p3, ncol = 3, labels = c('(a)', '(b)', '(c)'), common.legend = TRUE)
-ggsave(file.path(results_dir, 'tripeptide_pvalues.pdf'), p_all, width = 12, height = 4)
+p_all <- ggarrange(p1, p2, p3, ncol = 3, labels = c('(a)', '(b)', '(c)'), common.legend = TRUE, legend = 'bottom')
+ggsave(file.path(results_dir, 'tripeptide_pvalues.pdf'), p_all, width = 12, height = 4, device = cairo_pdf)

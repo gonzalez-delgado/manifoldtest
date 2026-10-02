@@ -16,6 +16,9 @@
 # trinucleotides, then written out as a LaTeX table (one column per
 # trinucleotide, one row per method).
 #
+# To automatically download and preprocess the data, run the shell script examples/data/build_nucleotides.sh
+# Then, run this script from the examples/ directory to perform the tests and generate the LaTeX table with results.
+#
 # Usage:
 #   cd examples && Rscript trinucleotides.R
 # ================================================================
@@ -132,18 +135,7 @@ if (file.exists(pv_file)) {
 }
 
 # ================================================================
-# 3. Multiplicity correction and summary
-# ================================================================
-
-pvalues$pv_adj    <- p.adjust(pvalues$pv,    method = "holm")
-pvalues$pv_co_adj <- p.adjust(pvalues$pv_co, method = "holm")
-
-cat(sprintf("Rejection rate at alpha = %.2f (Holm-adjusted):\n", alpha))
-cat(sprintf("  raw:             %.1f%%\n", mean(pvalues$pv_adj    < alpha, na.rm = TRUE) * 100))
-cat(sprintf("  center-outward:  %.1f%%\n", mean(pvalues$pv_co_adj < alpha, na.rm = TRUE) * 100))
-
-# ================================================================
-# 4. LaTeX table: one column per trinucleotide, one row per method
+# 3. LaTeX table: one column per trinucleotide, one row per method
 # ================================================================
 
 fmt_p <- function(p) formatC(p, format = "f", digits = 4)
@@ -156,11 +148,11 @@ tex_lines <- c(
     "\\toprule",
     paste("Method &", paste(pvalues$trinucleotide, collapse = " & "), "\\\\"),
     "\\midrule",
-    paste("raw &", paste(fmt_p(pvalues$pv_adj), collapse = " & "), "\\\\"),
-    paste("center-outward &", paste(fmt_p(pvalues$pv_co_adj), collapse = " & "), "\\\\"),
+    paste("DistCov &", paste(fmt_p(pvalues$pv), collapse = " & "), "\\\\"),
+    paste("CO+DistCov &", paste(fmt_p(pvalues$pv_co), collapse = " & "), "\\\\"),
     "\\bottomrule",
     "\\end{tabular}",
-    "\\caption{Holm-Bonferroni adjusted $p$-values for independence between sugar-pucker and backbone torsion angles, by trinucleotide.}",
+    "\\caption{$p$-values for independence between sugar-pucker angles, by trinucleotide.}",
     "\\label{tab:trinucleotide-pvalues}",
     "\\end{table}"
 )

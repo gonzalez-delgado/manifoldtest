@@ -49,5 +49,8 @@ po/*~
 rsconnect/
 
 # Example data and generated results (large/local, not tracked)
-examples/data/
+examples/data/*
+!examples/data/build_nucleotides.sh
+!examples/data/npy2pdb2angles.py
+!examples/data/build_tripeptides.sh
 examples/results/
