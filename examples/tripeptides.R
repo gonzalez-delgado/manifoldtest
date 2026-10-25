@@ -261,16 +261,20 @@ if (h1_cached) {
 
 #' Stack a (raw, center-outward) p-value pair into a long data frame for plotting
 to_long <- function(pv_raw, pv_co) {
-    rbind(data.frame(pv = pv_raw, method = "DistCov"),
-          data.frame(pv = pv_co,  method = "Center-outward + DistCov"))
+    data_long <- rbind(data.frame(pv = pv_raw, method = "DistCov"),
+                       data.frame(pv = pv_co,  method = "Center-outward + DistCov"))
+    # Factor order sets the drawing order: the dashed center-outward curve goes on top
+    data_long$method <- factor(data_long$method, levels = c("DistCov", "Center-outward + DistCov"))
+    data_long
 }
 
 ecdf_plot <- function(data_long, title) {
 
-    ggplot(data_long, aes(x = pv, color = method)) +
+    ggplot(data_long, aes(x = pv, color = method, linetype = method)) +
         stat_ecdf(linewidth = 1) +
-        geom_abline(linetype = 'dashed', color = 'darkblue') +
-        labs(x = expression(italic(p) * '-value'), y = 'ECDF', color = 'Method') +
+        geom_abline(linetype = 'dotted', color = 'darkblue') +
+        scale_linetype_manual(values = c("DistCov" = "solid", "Center-outward + DistCov" = "dashed")) +
+        labs(x = expression(italic(p) * '-value'), y = 'ECDF', color = 'Method', linetype = 'Method') +
         ggtitle(title) +
         theme_bw(base_size = 18) +
         theme(plot.title = element_text(size = rel(1)))
