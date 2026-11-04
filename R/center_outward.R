@@ -117,6 +117,11 @@ optimal_assignment <- function(Z, grid) {
 #' so any test statistic computed on \eqn{F} (e.g. a distance covariance
 #' test) requires no moment condition on the original data.
 #'
+#' This is the transform behind the \strong{RankCov} test of Liu et al.
+#' (2026), run by \code{\link{manifold.dcov.test}} with
+#' \code{center_outward = TRUE}: the distance covariance test is applied to
+#' the center-outward ranks of the tangent-space coordinates.
+#'
 #' @param Z Numeric matrix (\code{n} x \code{d}): Euclidean data, typically
 #'   the output of a manifold log map (e.g. \code{\link{log_map_torus}}).
 #' @param seed Integer random seed passed to \code{\link{build_ball_grid}}
@@ -126,6 +131,14 @@ optimal_assignment <- function(Z, grid) {
 #' @return Numeric matrix \code{F} (\code{n} x \code{d}): rows inside the
 #'   unit ball \eqn{S^d}, the multidimensional rank of each row of
 #'   \code{Z}.
+#'
+#' @references Liu, H., Li, M., González-Delgado, J. and Hallin, M. (2026).
+#'   Independence test on Riemannian manifolds. Manuscript.
+#'
+#'   Hallin, M., del Barrio, E., Cuesta-Albertos, J. and Matrán, C. (2021).
+#'   Distribution and quantile functions, ranks and signs in dimension d: a
+#'   measure transportation approach. \emph{The Annals of Statistics},
+#'   49(2), 1139--1165.
 #'
 #' @examples
 #' Z <- matrix(rnorm(20), nrow = 10, ncol = 2)

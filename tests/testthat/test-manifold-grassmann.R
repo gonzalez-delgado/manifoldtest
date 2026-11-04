@@ -119,7 +119,7 @@ test_that("manifold.dcov.test runs on the Grassmann manifold", {
   X <- exp_map_grassmann(B, U0)
   Y <- exp_map_grassmann(B + matrix(rnorm(length(B), sd = 0.1), nrow(B)), U0)
   m <- manifold_grassmann(4, 2)
-  res <- manifold.dcov.test(X, Y, manifold = m, R = 99, verbose = FALSE)
+  res <- manifold.dcov.test(X, Y, manifold = m, center_outward = TRUE, R = 99, verbose = FALSE)
 
   expect_lt(res$dcov_test$p.value, 0.05)
   expect_equal(ncol(res$X_mapped), 4)

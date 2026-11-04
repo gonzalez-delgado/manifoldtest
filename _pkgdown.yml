@@ -15,11 +15,15 @@ navbar:
   structure:
     left:
     - home
+    - guide
     - api
     right:
     - search
     - github
   components:
+    guide:
+      text: User guide
+      href: articles/user-guide.html
     api:
       text: API reference
       href: reference/index.html

@@ -2,7 +2,7 @@ test_that("manifold.dcov.test returns a p-value in [0, 1] and mapped data", {
   set.seed(12)
   X <- matrix(runif(90), nrow = 30, ncol = 3)
   Y <- matrix(runif(60), nrow = 30, ncol = 2)
-  res <- manifold.dcov.test(X, Y, R = 99, verbose = FALSE)
+  res <- manifold.dcov.test(X, Y, R = 99, center_outward = TRUE, verbose = FALSE)
 
   expect_named(res, c("dcov_test", "px_base", "py_base", "X_mapped", "Y_mapped"))
   expect_s3_class(res$dcov_test, "htest")
@@ -11,6 +11,14 @@ test_that("manifold.dcov.test returns a p-value in [0, 1] and mapped data", {
   expect_equal(dim(res$X_mapped), c(30, 3))
   expect_equal(dim(res$Y_mapped), c(30, 2))
   expect_true(all(sqrt(rowSums(res$X_mapped^2)) < 1))
+})
+
+test_that("manifold.dcov.test runs DistCov by default", {
+  set.seed(19)
+  X <- matrix(runif(40), nrow = 20, ncol = 2)
+  Y <- matrix(runif(40), nrow = 20, ncol = 2)
+  res <- manifold.dcov.test(X, Y, R = 19, verbose = FALSE)
+  expect_equal(res$X_mapped, log_map_torus(X, res$px_base))
 })
 
 test_that("manifold.dcov.test without center-outward uses the raw log map", {
@@ -73,4 +81,13 @@ test_that("manifold.dcov.test p-values are roughly uniform under independence", 
   expect_lte(sum(pvals < 0.05), 12)
   expect_gt(mean(pvals), 0.35)
   expect_lt(mean(pvals), 0.65)
+})
+
+test_that("manifold.dcov.test accepts vectors as one-dimensional samples", {
+  set.seed(18)
+  x <- runif(30)
+  y <- (x + rnorm(30, sd = 0.05)) %% 1
+  res <- manifold.dcov.test(x, y, R = 99, verbose = FALSE)
+  expect_equal(dim(res$X_mapped), c(30, 1))
+  expect_lt(res$dcov_test$p.value, 0.05)
 })

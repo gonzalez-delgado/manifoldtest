@@ -12,7 +12,7 @@ manifold.dcov.test(
   py_base = NULL,
   R = 500,
   seed = 2024,
-  center_outward = TRUE,
+  center_outward = FALSE,
   base_point_method = NULL,
   n_start = 10,
   maxit = 200,
@@ -23,7 +23,8 @@ manifold.dcov.test(
 \item{X}{A matrix or data frame of data on \code{manifold}, in its
 representation (for the torus, rows in \eqn{[0,1)^d}; for hyperbolic
 space, rows on the hyperboloid; for the Grassmann manifold, flattened
-Stiefel matrices); rows are samples, columns are coordinates.}
+Stiefel matrices); rows are samples, columns are coordinates. A vector
+is treated as a one-column matrix.}
 
 \item{Y}{A matrix or data frame of data on \code{manifold}, analogous
 to \code{X}.}
@@ -51,14 +52,18 @@ sample sizes of \code{X} and \code{Y} differ, by
 \code{\link{center_outward_transform}} when \code{center_outward =
 TRUE}. Defaults to \code{2024}.}
 
-\item{center_outward}{If \code{TRUE} (the default), applies the
+\item{center_outward}{If \code{TRUE}, runs the
+\strong{RankCov} test of Liu et al. (2026): applies the
 center-outward rank transform (Hallin et al. 2021,
 \code{\link{center_outward_transform}}) to the log-mapped \code{X} and
 \code{Y} before testing, so the distance covariance test is computed
 on multidimensional ranks bounded in the unit ball rather than on the
 raw tangent-space coordinates. This makes the test valid without
-moment conditions on the original data. If \code{FALSE}, the test runs
-directly on the tangent-space coordinates from the manifold's log map.}
+moment conditions on the original data. If \code{FALSE} (the default),
+runs the \strong{DistCov} test: the test runs directly on the
+tangent-space coordinates from the manifold's log map. On hyperbolic
+space, \code{FALSE} raises a warning, since DistCov then relies on
+moment conditions that may fail.}
 
 \item{base_point_method}{Base point method, passed as \code{method} to
 \code{\link{choose_base_point}} for any base point that must be
@@ -89,8 +94,8 @@ A list with five elements:
   \item{X_mapped}{The mapped \code{X} samples actually used for the
     test: rows in the unit ball \eqn{S^d} from
     \code{\link{center_outward_transform}} if \code{center_outward =
-    TRUE}, otherwise the tangent-space coordinates from the
-    manifold's log map.}
+    TRUE} (RankCov), otherwise the tangent-space coordinates from the
+    manifold's log map (DistCov).}
   \item{Y_mapped}{The mapped \code{Y} samples actually used for the
     test, analogous to \code{X_mapped}.}
 }
@@ -99,7 +104,28 @@ Aligns \code{X} and \code{Y} to a common sample size, chooses (or
 validates a user-supplied) base point for each, maps both data sets from
 the manifold to the tangent space via the inverse exponential map, then
 runs a distance covariance permutation test to assess independence
-between them.
+between them. It implements the \strong{DistCov} (default) and
+\strong{RankCov} tests of Liu et al. (2026); see Details.
+}
+\details{
+The function implements the two tests of Liu et al. (2026), selected by
+\code{center_outward}:
+\itemize{
+  \item \strong{DistCov} (\code{center_outward = FALSE}, the default): the
+    distance covariance test is applied directly to the tangent-space
+    coordinates. It requires finite second moments of the distances
+    (always the case on compact manifolds such as the torus and the
+    Grassmann manifold) and is sensitive to outliers. On hyperbolic space,
+    which is not compact, a warning suggests using RankCov instead.
+  \item \strong{RankCov} (\code{center_outward = TRUE}): the
+    distance covariance test is applied to the center-outward ranks
+    (\code{\link{center_outward_transform}}) of the tangent-space
+    coordinates. It requires no moment condition and is robust to
+    outliers, but requires continuous distributions and can lose power in
+    high dimensions or with small samples.
+}
+Both tests have exact finite-sample level by permutation. See the user
+guide on the package website for advice on choosing between them.
 }
 \examples{
 \donttest{
@@ -111,4 +137,13 @@ result$px_base
 dim(result$X_mapped)
 }
 
+}
+\references{
+Liu, H., Li, M., González-Delgado, J. and Hallin, M. (2026).
+  Independence test on Riemannian manifolds. Manuscript.
+
+  Hallin, M., del Barrio, E., Cuesta-Albertos, J. and Matrán, C. (2021).
+  Distribution and quantile functions, ranks and signs in dimension d: a
+  measure transportation approach. \emph{The Annals of Statistics},
+  49(2), 1139--1165.
 }

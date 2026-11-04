@@ -30,10 +30,25 @@ each observation by the optimal \eqn{L^2} coupling
 so any test statistic computed on \eqn{F} (e.g. a distance covariance
 test) requires no moment condition on the original data.
 }
+\details{
+This is the transform behind the \strong{RankCov} test of Liu et al.
+(2026), run by \code{\link{manifold.dcov.test}} with
+\code{center_outward = TRUE}: the distance covariance test is applied to
+the center-outward ranks of the tangent-space coordinates.
+}
 \examples{
 Z <- matrix(rnorm(20), nrow = 10, ncol = 2)
 F <- center_outward_transform(Z)
 dim(F)
 max(sqrt(rowSums(F^2))) <= 1
 
+}
+\references{
+Liu, H., Li, M., González-Delgado, J. and Hallin, M. (2026).
+  Independence test on Riemannian manifolds. Manuscript.
+
+  Hallin, M., del Barrio, E., Cuesta-Albertos, J. and Matrán, C. (2021).
+  Distribution and quantile functions, ranks and signs in dimension d: a
+  measure transportation approach. \emph{The Annals of Statistics},
+  49(2), 1139--1165.
 }

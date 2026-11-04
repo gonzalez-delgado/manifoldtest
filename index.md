@@ -30,6 +30,11 @@ result$dcov_test$p.value
 
 <div class="guide-cards">
 
+  <a class="guide-card" href="articles/user-guide.html">
+  <h3>📖 User guide</h3>
+  <p>How to run the test, with examples on each manifold.</p>
+  </a>
+
   <a class="guide-card" href="reference/">
   <h3>🧩 API documentation</h3>
   <p>Function reference and package documentation.</p>

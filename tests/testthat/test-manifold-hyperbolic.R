@@ -97,11 +97,27 @@ test_that("manifold.dcov.test runs on hyperbolic space", {
   U <- matrix(rnorm(150), nrow = 50, ncol = 3)
   X <- exp_map_hyperbolic(U)
   Y <- exp_map_hyperbolic(U + matrix(rnorm(150, sd = 0.3), nrow = 50))
-  res <- manifold.dcov.test(X, Y, manifold = "hyperbolic", R = 99, verbose = FALSE)
+  res <- manifold.dcov.test(X, Y, manifold = "hyperbolic", center_outward = TRUE,
+                            R = 99, verbose = FALSE)
 
   expect_lt(res$dcov_test$p.value, 0.05)
   expect_equal(dim(res$X_mapped), c(50, 3))
   expect_error(manifold.dcov.test(matrix(runif(30), 10), X[1:10, ], manifold = "hyperbolic",
                                   verbose = FALSE),
                "X should lie on the hyperbolic")
+})
+
+test_that("DistCov on hyperbolic space warns and suggests RankCov", {
+  set.seed(28)
+  X <- exp_map_hyperbolic(matrix(rnorm(40), nrow = 20, ncol = 2))
+  Y <- exp_map_hyperbolic(matrix(rnorm(40), nrow = 20, ncol = 2))
+  expect_warning(manifold.dcov.test(X, Y, manifold = "hyperbolic", R = 19, verbose = FALSE),
+                 "center_outward = TRUE")
+  expect_silent(manifold.dcov.test(X, Y, manifold = "hyperbolic", center_outward = TRUE,
+                                       R = 19, verbose = FALSE))
+})
+
+test_that("DistCov does not warn on compact manifolds", {
+  X <- matrix(runif(40), nrow = 20, ncol = 2)
+  expect_silent(manifold.dcov.test(X, X[20:1, ], R = 19, verbose = FALSE))
 })

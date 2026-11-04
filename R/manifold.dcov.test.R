@@ -4,12 +4,33 @@
 #' validates a user-supplied) base point for each, maps both data sets from
 #' the manifold to the tangent space via the inverse exponential map, then
 #' runs a distance covariance permutation test to assess independence
-#' between them.
+#' between them. It implements the \strong{DistCov} (default) and
+#' \strong{RankCov} tests of Liu et al. (2026); see Details.
+#'
+#' The function implements the two tests of Liu et al. (2026), selected by
+#' \code{center_outward}:
+#' \itemize{
+#'   \item \strong{DistCov} (\code{center_outward = FALSE}, the default): the
+#'     distance covariance test is applied directly to the tangent-space
+#'     coordinates. It requires finite second moments of the distances
+#'     (always the case on compact manifolds such as the torus and the
+#'     Grassmann manifold) and is sensitive to outliers. On hyperbolic space,
+#'     which is not compact, a warning suggests using RankCov instead.
+#'   \item \strong{RankCov} (\code{center_outward = TRUE}): the
+#'     distance covariance test is applied to the center-outward ranks
+#'     (\code{\link{center_outward_transform}}) of the tangent-space
+#'     coordinates. It requires no moment condition and is robust to
+#'     outliers, but requires continuous distributions and can lose power in
+#'     high dimensions or with small samples.
+#' }
+#' Both tests have exact finite-sample level by permutation. See the user
+#' guide on the package website for advice on choosing between them.
 #'
 #' @param X A matrix or data frame of data on \code{manifold}, in its
 #'   representation (for the torus, rows in \eqn{[0,1)^d}; for hyperbolic
 #'   space, rows on the hyperboloid; for the Grassmann manifold, flattened
-#'   Stiefel matrices); rows are samples, columns are coordinates.
+#'   Stiefel matrices); rows are samples, columns are coordinates. A vector
+#'   is treated as a one-column matrix.
 #' @param Y A matrix or data frame of data on \code{manifold}, analogous
 #'   to \code{X}.
 #' @param manifold The manifold \code{X} and \code{Y} lie on: a name
@@ -30,14 +51,18 @@
 #'   "optimize"}, and by
 #'   \code{\link{center_outward_transform}} when \code{center_outward =
 #'   TRUE}. Defaults to \code{2024}.
-#' @param center_outward If \code{TRUE} (the default), applies the
+#' @param center_outward If \code{TRUE}, runs the
+#'   \strong{RankCov} test of Liu et al. (2026): applies the
 #'   center-outward rank transform (Hallin et al. 2021,
 #'   \code{\link{center_outward_transform}}) to the log-mapped \code{X} and
 #'   \code{Y} before testing, so the distance covariance test is computed
 #'   on multidimensional ranks bounded in the unit ball rather than on the
 #'   raw tangent-space coordinates. This makes the test valid without
-#'   moment conditions on the original data. If \code{FALSE}, the test runs
-#'   directly on the tangent-space coordinates from the manifold's log map.
+#'   moment conditions on the original data. If \code{FALSE} (the default),
+#'   runs the \strong{DistCov} test: the test runs directly on the
+#'   tangent-space coordinates from the manifold's log map. On hyperbolic
+#'   space, \code{FALSE} raises a warning, since DistCov then relies on
+#'   moment conditions that may fail.
 #' @param base_point_method Base point method, passed as \code{method} to
 #'   \code{\link{choose_base_point}} for any base point that must be
 #'   chosen automatically. If \code{NULL} (the default), the manifold's
@@ -63,10 +88,18 @@
 #'   \item{X_mapped}{The mapped \code{X} samples actually used for the
 #'     test: rows in the unit ball \eqn{S^d} from
 #'     \code{\link{center_outward_transform}} if \code{center_outward =
-#'     TRUE}, otherwise the tangent-space coordinates from the
-#'     manifold's log map.}
+#'     TRUE} (RankCov), otherwise the tangent-space coordinates from the
+#'     manifold's log map (DistCov).}
 #'   \item{Y_mapped}{The mapped \code{Y} samples actually used for the
 #'     test, analogous to \code{X_mapped}.}
+#'
+#' @references Liu, H., Li, M., González-Delgado, J. and Hallin, M. (2026).
+#'   Independence test on Riemannian manifolds. Manuscript.
+#'
+#'   Hallin, M., del Barrio, E., Cuesta-Albertos, J. and Matrán, C. (2021).
+#'   Distribution and quantile functions, ranks and signs in dimension d: a
+#'   measure transportation approach. \emph{The Annals of Statistics},
+#'   49(2), 1139--1165.
 #'
 #' @examples
 #' \donttest{
@@ -81,7 +114,7 @@
 #' @export
 manifold.dcov.test <- function(X, Y, manifold = "torus",
                                px_base = NULL, py_base = NULL,
-                               R = 500, seed = 2024, center_outward = TRUE,
+                               R = 500, seed = 2024, center_outward = FALSE,
                                base_point_method = NULL, n_start = 10, maxit = 200,
                                verbose = TRUE) {
 
@@ -89,8 +122,22 @@ manifold.dcov.test <- function(X, Y, manifold = "torus",
 
     # -------------- Input validation --------------
 
+    # A vector is a sample of one-dimensional points (e.g. single angles)
+    if (is.null(dim(X))) X <- matrix(X, ncol = 1)
+    if (is.null(dim(Y))) Y <- matrix(Y, ncol = 1)
+
     if (!manifold$contains(X)) stop(sprintf("X should lie on the %s, represented as %s.", manifold$name, manifold$representation))
     if (!manifold$contains(Y)) stop(sprintf("Y should lie on the %s, represented as %s.", manifold$name, manifold$representation))
+
+    # DistCov needs finite second moments of the distances, which may fail on
+    # a non-compact manifold
+    if (!center_outward && manifold$name == "hyperbolic") {
+        warning(paste(
+            "DistCov (center_outward = FALSE) requires finite second moments of the geodesic distances,",
+            "which may fail on hyperbolic space (it is not compact) when the data are heavy-tailed,",
+            "and it is sensitive to outliers. Consider setting center_outward = TRUE (RankCov),",
+            "which needs no moment condition and is robust to outliers."), call. = FALSE)
+    }
 
     # -------------- Sample size alignment --------------
 
@@ -153,6 +200,7 @@ manifold.dcov.test <- function(X, Y, manifold = "torus",
         message("\n========================================")
         message(" Distance Covariance Independence Test Result")
         message("========================================")
+        message(sprintf("Method: %s\n", if (center_outward) "RankCov (center-outward ranks)" else "DistCov (tangent-space coordinates)"))
         message(sprintf("Sample size: %d\n", nrow(X_euclidean)))
         message(sprintf("X Dimension: %d\n", ncol(X_euclidean)))
         message(sprintf("Sample size: %d\n", nrow(Y_euclidean)))
