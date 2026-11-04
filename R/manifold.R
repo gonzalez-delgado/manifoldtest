@@ -1,4 +1,4 @@
-#' Define a manifold for use in the package
+#' Define a manifold for use in the package.
 #'
 #' Bundles everything the package needs to know about a manifold into a
 #' single object. \code{\link{manifold.dcov.test}} and
@@ -78,7 +78,7 @@ manifold_registry <- list(
 # Manifolds that need parameters, and so cannot be retrieved by name alone
 manifold_parametric <- c(grassmann = "manifold_grassmann(n, k)")
 
-#' Retrieve a manifold by name
+#' Retrieve a manifold by name.
 #'
 #' Resolves the \code{manifold} argument of \code{\link{manifold.dcov.test}}
 #' and \code{\link{choose_base_point}}.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{auto_base_point_grassmann}
 \alias{auto_base_point_grassmann}
-\title{Find a Grassmann base point via the projection mean}
+\title{Find a Grassmann base point via the projection mean.}
 \usage{
 auto_base_point_grassmann(X, n, k)
 }

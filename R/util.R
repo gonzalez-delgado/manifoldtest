@@ -1,6 +1,6 @@
 
 
-#' Align sample sizes of two data sets
+#' Align sample sizes of two data sets.
 #'
 #' Checks whether \code{X_raw} and \code{Y_raw} have the same number of rows,
 #' and if not, randomly subsamples both to the smaller of the two sizes so
@@ -47,7 +47,7 @@ align_sample_sizes <- function(X_raw, Y_raw, seed = 2024) {
     return(list(X = X, Y = Y))
 }
 
-#' Find a base point via multi-start optimization
+#' Find a base point via multi-start optimization.
 #'
 #' Manifold-agnostic search for a data-centered base point: numerically
 #' minimizes the total geodesic distance \code{sum(dist(X, p))} from a

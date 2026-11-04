@@ -1,4 +1,4 @@
-#' The flat torus manifold
+#' The flat torus manifold.
 #'
 #' Returns the \code{\link{new_manifold}} object describing the flat torus
 #' \eqn{T^d}, with points represented as rows in \eqn{[0,1)^d}. This is the
@@ -42,7 +42,7 @@ manifold_torus <- function() {
     )
 }
 
-#' Check that data lies in the torus representation [0,1)^d
+#' Check that data lies in the torus representation [0,1)^d.
 #'
 #' Checks whether every value of \code{X} lies in \eqn{[0,1)}, the torus
 #' representation expected by the torus functions of this package (see
@@ -67,7 +67,7 @@ is_in_torus <- function(X) {
 
 }
 
-#' Map torus data to the tangent space at a base point
+#' Map torus data to the tangent space at a base point.
 #'
 #' Applies the logarithmic map to send torus data in \eqn{[0,1)^d}
 #' into the tangent space \eqn{[-0.5, 0.5)^d} at base point \code{p}: for
@@ -96,7 +96,7 @@ log_map_torus <- function(X, p) {
 
 }
 
-#' Torus distance from a data set to a point
+#' Torus distance from a data set to a point.
 #'
 #' Computes the flat-torus distance between each row of \code{X} and the
 #' point \code{p}: for each coordinate, the shortest wraparound distance
@@ -123,7 +123,7 @@ dist_torus <- function(X, p) {
     sqrt(rowSums(diff^2))
 }
 
-#' Check whether a base point is valid for a torus data set
+#' Check whether a base point is valid for a torus data set.
 #'
 #' Checks that \code{p} has one coordinate per column of \code{X}, and
 #' warns if any row of \code{X} lies on the cut locus of \code{p}, where
@@ -158,7 +158,7 @@ is_valid_torus <- function(X, p) {
     invisible(n_cut == 0)
 }
 
-#' Midpoint of the largest gap on the circle [0,1)
+#' Midpoint of the largest gap on the circle [0,1).
 #'
 #' Given a set of forbidden values on the circle, returns the point that is
 #' as far as possible from every forbidden value: the midpoint of the
@@ -192,7 +192,7 @@ largest_gap_point_torus <- function(values) {
     return(midpoint)
 }
 
-#' Find a torus base point via the maximal-gap method
+#' Find a torus base point via the maximal-gap method.
 #'
 #' For the flat torus \eqn{T^d} with base point \code{p}, the cut locus is
 #' \code{cut(p) = \{q : (q_j - p_j) mod 1 = 0.5 for some j\}}. A sample
@@ -222,7 +222,7 @@ auto_base_point_torus <- function(X) {
 
 }
 
-#' Find a torus base point via multi-start optimization
+#' Find a torus base point via multi-start optimization.
 #'
 #' Torus case of \code{\link{optimize_base_point}}: numerically minimizes
 #' the total torus distance (\code{\link{dist_torus}}) from a candidate

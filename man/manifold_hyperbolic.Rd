@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{manifold_hyperbolic}
 \alias{manifold_hyperbolic}
-\title{Hyperbolic space}
+\title{Hyperbolic space.}
 \usage{
 manifold_hyperbolic()
 }

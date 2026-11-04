@@ -1,4 +1,4 @@
-#' The Grassmann manifold
+#' The Grassmann manifold.
 #'
 #' Returns the \code{\link{new_manifold}} object describing the Grassmann
 #' manifold \eqn{Gr(n, k)} of \code{k}-dimensional linear subspaces of
@@ -106,7 +106,7 @@ grassmann_log_one <- function(V, U0) {
     s2$u %*% diag(asin(pmin(s2$d, 1)), k, k) %*% t(s2$v)
 }
 
-#' Check that data lies on the Grassmann manifold
+#' Check that data lies on the Grassmann manifold.
 #'
 #' Checks that \code{X} has \code{n * k} columns and that every row,
 #' reshaped as an \code{n} x \code{k} matrix \eqn{U} (column by column),
@@ -140,7 +140,7 @@ is_in_grassmann <- function(X, n, k, tol = 1e-6) {
     }))
 }
 
-#' Map Grassmann data to the tangent space at a base point
+#' Map Grassmann data to the tangent space at a base point.
 #'
 #' Applies the Riemannian logarithm of \eqn{Gr(n, k)} at base point
 #' \eqn{U_0}, computed with Algorithm 5.3 of Bendokat, Zimmermann and
@@ -188,7 +188,7 @@ log_map_grassmann <- function(X, p, n, k) {
     matrix(out, nrow = nrow(X), ncol = (n - k) * k)
 }
 
-#' Map tangent vectors to the Grassmann manifold
+#' Map tangent vectors to the Grassmann manifold.
 #'
 #' Exponential map of \eqn{Gr(n, k)} at base point \eqn{U_0}, the inverse
 #' of \code{\link{log_map_grassmann}} on the cut domain. Each row of
@@ -234,7 +234,7 @@ exp_map_grassmann <- function(V, p, n = nrow(p), k = ncol(p)) {
     matrix(out, nrow = nrow(V), ncol = n * k)
 }
 
-#' Grassmann distance from a data set to a point
+#' Grassmann distance from a data set to a point.
 #'
 #' Computes the geodesic distance on \eqn{Gr(n, k)} between each row of
 #' \code{X} and the base point \code{p}: the square root of the sum of the
@@ -258,7 +258,7 @@ dist_grassmann <- function(X, p, n, k) {
     sqrt(rowSums(log_map_grassmann(X, p, n, k)^2))
 }
 
-#' Check whether a base point is valid for a Grassmann data set
+#' Check whether a base point is valid for a Grassmann data set.
 #'
 #' Checks that \code{p} represents a point of \eqn{Gr(n, k)}, and warns if
 #' any row of \code{X} lies on the cut locus of \code{p}, i.e. has a
@@ -297,7 +297,7 @@ is_valid_grassmann <- function(X, p, n, k) {
     invisible(n_cut == 0)
 }
 
-#' Find a Grassmann base point via the projection mean
+#' Find a Grassmann base point via the projection mean.
 #'
 #' Closed-form, data-centered base point for \eqn{Gr(n, k)}: the subspace
 #' spanned by the \code{k} leading eigenvectors of the mean orthogonal
@@ -328,7 +328,7 @@ auto_base_point_grassmann <- function(X, n, k) {
     as.vector(eigen(P / nrow(X), symmetric = TRUE)$vectors[, seq_len(k), drop = FALSE])
 }
 
-#' Find a Grassmann base point via multi-start optimization
+#' Find a Grassmann base point via multi-start optimization.
 #'
 #' Grassmann case of \code{\link{optimize_base_point}}: numerically
 #' minimizes the total Grassmann distance (\code{\link{dist_grassmann}})

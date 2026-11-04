@@ -1,6 +1,6 @@
 Package: manifoldtest
 Type: Package
-Title: Independence Testing for Manifold-Valued Data
+Title: Independence Test on Riemannian Manifolds
 Version: 1.0.0
 Authors@R: c(
     person("Mingyu", "Li", role = "aut"),
@@ -15,7 +15,7 @@ Description: Tools for testing statistical independence between samples of
     center-outward distribution function of Hallin et al. (2021), and then
     tested for independence with the classical distance covariance test of
     Szekely, Rizzo and Bakirov (2007).
-License: MIT + file LICENSE
+License: GPL (>= 3)
 URL: https://gonzalez-delgado.github.io/manifoldtest/,
     https://github.com/gonzalez-delgado/manifoldtest
 BugReports: https://github.com/gonzalez-delgado/manifoldtest/issues

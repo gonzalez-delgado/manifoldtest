@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{log_map_grassmann}
 \alias{log_map_grassmann}
-\title{Map Grassmann data to the tangent space at a base point}
+\title{Map Grassmann data to the tangent space at a base point.}
 \usage{
 log_map_grassmann(X, p, n, k)
 }

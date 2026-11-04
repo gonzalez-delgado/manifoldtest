@@ -1,4 +1,4 @@
-#' Hyperbolic space
+#' Hyperbolic space.
 #'
 #' Returns the \code{\link{new_manifold}} object describing the hyperbolic
 #' space \eqn{H^d} of constant curvature \eqn{-1}, in the hyperboloid model
@@ -59,7 +59,7 @@ lorentz_boost <- function(p, inverse = FALSE) {
           cbind(s * pr, diag(length(pr)) + tcrossprod(pr) / (1 + p0)))
 }
 
-#' Check that data lies on the hyperboloid
+#' Check that data lies on the hyperboloid.
 #'
 #' Checks whether every row \eqn{x} of \code{X} satisfies
 #' \eqn{-x_0^2 + x_1^2 + \dots + x_d^2 = -1} and \eqn{x_0 > 0}, up to a
@@ -89,7 +89,7 @@ is_in_hyperbolic <- function(X, tol = 1e-6) {
     all(x0 > 0 & abs(lorentz + 1) <= tol * x0^2)
 }
 
-#' Map hyperbolic data to the tangent space at a base point
+#' Map hyperbolic data to the tangent space at a base point.
 #'
 #' Applies the logarithmic map of \eqn{H^d} at base point \code{p}. At
 #' \eqn{p = (1, 0, \ldots, 0)} it is
@@ -125,7 +125,7 @@ log_map_hyperbolic <- function(X, p) {
     Yr * (asinh(nr) / ifelse(nr > 0, nr, 1))
 }
 
-#' Map tangent vectors to hyperbolic space
+#' Map tangent vectors to hyperbolic space.
 #'
 #' Exponential map of \eqn{H^d} at base point \code{p}, the inverse of
 #' \code{\link{log_map_hyperbolic}}. Useful to simulate data on \eqn{H^d}.
@@ -151,7 +151,7 @@ exp_map_hyperbolic <- function(V, p = c(1, rep(0, ncol(V)))) {
     Y %*% lorentz_boost(p)
 }
 
-#' Hyperbolic distance from a data set to a point
+#' Hyperbolic distance from a data set to a point.
 #'
 #' Computes the geodesic distance on \eqn{H^d} between each row of \code{X}
 #' and the point \code{p}, i.e. \eqn{\mathrm{arccosh}(-\langle x, p
@@ -177,7 +177,7 @@ dist_hyperbolic <- function(X, p) {
     sqrt(rowSums(log_map_hyperbolic(X, p)^2))
 }
 
-#' Check whether a base point is valid for a hyperbolic data set
+#' Check whether a base point is valid for a hyperbolic data set.
 #'
 #' Checks that \code{p} has one coordinate per column of \code{X} and lies
 #' on the hyperboloid. Since \eqn{H^d} has an empty cut locus, any such
@@ -207,7 +207,7 @@ is_valid_hyperbolic <- function(X, p) {
     invisible(TRUE)
 }
 
-#' Find a hyperbolic base point via the Lorentzian centroid
+#' Find a hyperbolic base point via the Lorentzian centroid.
 #'
 #' Closed-form, data-centered base point for \eqn{H^d}: the Euclidean mean
 #' \eqn{m} of the rows of \code{X}, rescaled back onto the hyperboloid,
@@ -232,7 +232,7 @@ auto_base_point_hyperbolic <- function(X) {
     m / sqrt(m[1]^2 - sum(m[-1]^2))
 }
 
-#' Find a hyperbolic base point via multi-start optimization
+#' Find a hyperbolic base point via multi-start optimization.
 #'
 #' Hyperbolic case of \code{\link{optimize_base_point}}: numerically
 #' minimizes the total hyperbolic distance (\code{\link{dist_hyperbolic}})

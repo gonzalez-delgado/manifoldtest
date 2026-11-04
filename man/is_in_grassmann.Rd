@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{is_in_grassmann}
 \alias{is_in_grassmann}
-\title{Check that data lies on the Grassmann manifold}
+\title{Check that data lies on the Grassmann manifold.}
 \usage{
 is_in_grassmann(X, n, k, tol = 1e-06)
 }

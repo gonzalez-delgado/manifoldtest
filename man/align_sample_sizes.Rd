@@ -2,7 +2,7 @@
 % Please edit documentation in R/util.R
 \name{align_sample_sizes}
 \alias{align_sample_sizes}
-\title{Align sample sizes of two data sets}
+\title{Align sample sizes of two data sets.}
 \usage{
 align_sample_sizes(X_raw, Y_raw, seed = 2024)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{is_valid_grassmann}
 \alias{is_valid_grassmann}
-\title{Check whether a base point is valid for a Grassmann data set}
+\title{Check whether a base point is valid for a Grassmann data set.}
 \usage{
 is_valid_grassmann(X, p, n, k)
 }

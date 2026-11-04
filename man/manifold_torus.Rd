@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{manifold_torus}
 \alias{manifold_torus}
-\title{The flat torus manifold}
+\title{The flat torus manifold.}
 \usage{
 manifold_torus()
 }

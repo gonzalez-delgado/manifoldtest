@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{manifold_grassmann}
 \alias{manifold_grassmann}
-\title{The Grassmann manifold}
+\title{The Grassmann manifold.}
 \usage{
 manifold_grassmann(n, k)
 }

@@ -1,4 +1,4 @@
-#' Choose a base point for the logarithmic map
+#' Choose a base point for the logarithmic map.
 #'
 #' Finds a base point \code{p} on the manifold for \code{X}, using one of
 #' the base point methods provided by the manifold (see

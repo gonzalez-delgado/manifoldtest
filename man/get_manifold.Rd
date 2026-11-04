@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold.R
 \name{get_manifold}
 \alias{get_manifold}
-\title{Retrieve a manifold by name}
+\title{Retrieve a manifold by name.}
 \usage{
 get_manifold(manifold)
 }

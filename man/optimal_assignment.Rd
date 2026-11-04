@@ -2,7 +2,7 @@
 % Please edit documentation in R/center_outward.R
 \name{optimal_assignment}
 \alias{optimal_assignment}
-\title{Solve the optimal L2 assignment between data and grid}
+\title{Solve the optimal L2 assignment between data and grid.}
 \usage{
 optimal_assignment(Z, grid)
 }

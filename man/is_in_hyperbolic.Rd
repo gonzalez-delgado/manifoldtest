@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{is_in_hyperbolic}
 \alias{is_in_hyperbolic}
-\title{Check that data lies on the hyperboloid}
+\title{Check that data lies on the hyperboloid.}
 \usage{
 is_in_hyperbolic(X, tol = 1e-06)
 }

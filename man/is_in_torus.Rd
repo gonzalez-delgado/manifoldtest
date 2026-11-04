@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{is_in_torus}
 \alias{is_in_torus}
-\title{Check that data lies in the torus representation [0,1)^d}
+\title{Check that data lies in the torus representation [0,1)^d.}
 \usage{
 is_in_torus(X)
 }

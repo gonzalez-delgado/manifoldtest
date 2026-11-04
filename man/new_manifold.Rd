@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold.R
 \name{new_manifold}
 \alias{new_manifold}
-\title{Define a manifold for use in the package}
+\title{Define a manifold for use in the package.}
 \usage{
 new_manifold(
   name,

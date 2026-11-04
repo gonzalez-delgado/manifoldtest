@@ -2,7 +2,7 @@
 % Please edit documentation in R/choose_base_point.R
 \name{choose_base_point}
 \alias{choose_base_point}
-\title{Choose a base point for the logarithmic map}
+\title{Choose a base point for the logarithmic map.}
 \usage{
 choose_base_point(
   X,

@@ -1,4 +1,4 @@
-#' Build a regular grid on the unit ball
+#' Build a regular grid on the unit ball.
 #'
 #' Following Hallin et al. (2021) and the OT2.R reference code, builds a
 #' grid of \code{n} points on the unit ball \eqn{S^d} used as the target of
@@ -69,7 +69,7 @@ build_ball_grid <- function(n, d, nR, nS, n0, seed = 42) {
   return(t(sweep(direction_Grid, 2, length_Grid, "*")))
 }
 
-#' Solve the optimal L2 assignment between data and grid
+#' Solve the optimal L2 assignment between data and grid.
 #'
 #' Computes the bijection \eqn{\pi} between the \code{n} sample points and
 #' the \code{n} grid points that minimizes
@@ -105,7 +105,7 @@ optimal_assignment <- function(Z, grid) {
                       method = "networkflow")$to
 }
 
-#' Center-outward transform
+#' Center-outward transform.
 #'
 #' Maps \code{d}-dimensional Euclidean data to the open unit ball
 #' \eqn{S^d}, following Hallin et al. (2021), by returning the empirical

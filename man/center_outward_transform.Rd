@@ -2,7 +2,7 @@
 % Please edit documentation in R/center_outward.R
 \name{center_outward_transform}
 \alias{center_outward_transform}
-\title{Center-outward transform}
+\title{Center-outward transform.}
 \usage{
 center_outward_transform(Z, seed = 42)
 }

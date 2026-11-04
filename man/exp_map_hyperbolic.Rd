@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{exp_map_hyperbolic}
 \alias{exp_map_hyperbolic}
-\title{Map tangent vectors to hyperbolic space}
+\title{Map tangent vectors to hyperbolic space.}
 \usage{
 exp_map_hyperbolic(V, p = c(1, rep(0, ncol(V))))
 }

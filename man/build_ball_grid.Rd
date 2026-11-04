@@ -2,7 +2,7 @@
 % Please edit documentation in R/center_outward.R
 \name{build_ball_grid}
 \alias{build_ball_grid}
-\title{Build a regular grid on the unit ball}
+\title{Build a regular grid on the unit ball.}
 \usage{
 build_ball_grid(n, d, nR, nS, n0, seed = 42)
 }

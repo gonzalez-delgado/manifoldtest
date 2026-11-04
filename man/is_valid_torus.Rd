@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{is_valid_torus}
 \alias{is_valid_torus}
-\title{Check whether a base point is valid for a torus data set}
+\title{Check whether a base point is valid for a torus data set.}
 \usage{
 is_valid_torus(X, p)
 }

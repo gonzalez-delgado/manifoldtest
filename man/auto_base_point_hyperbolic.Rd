@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{auto_base_point_hyperbolic}
 \alias{auto_base_point_hyperbolic}
-\title{Find a hyperbolic base point via the Lorentzian centroid}
+\title{Find a hyperbolic base point via the Lorentzian centroid.}
 \usage{
 auto_base_point_hyperbolic(X)
 }

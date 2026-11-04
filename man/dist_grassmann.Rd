@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{dist_grassmann}
 \alias{dist_grassmann}
-\title{Grassmann distance from a data set to a point}
+\title{Grassmann distance from a data set to a point.}
 \usage{
 dist_grassmann(X, p, n, k)
 }

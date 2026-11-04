@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{dist_hyperbolic}
 \alias{dist_hyperbolic}
-\title{Hyperbolic distance from a data set to a point}
+\title{Hyperbolic distance from a data set to a point.}
 \usage{
 dist_hyperbolic(X, p)
 }

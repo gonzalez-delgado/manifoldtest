@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{dist_torus}
 \alias{dist_torus}
-\title{Torus distance from a data set to a point}
+\title{Torus distance from a data set to a point.}
 \usage{
 dist_torus(X, p)
 }

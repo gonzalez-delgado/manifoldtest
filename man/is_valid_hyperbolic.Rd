@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{is_valid_hyperbolic}
 \alias{is_valid_hyperbolic}
-\title{Check whether a base point is valid for a hyperbolic data set}
+\title{Check whether a base point is valid for a hyperbolic data set.}
 \usage{
 is_valid_hyperbolic(X, p)
 }

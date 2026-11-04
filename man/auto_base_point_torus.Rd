@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{auto_base_point_torus}
 \alias{auto_base_point_torus}
-\title{Find a torus base point via the maximal-gap method}
+\title{Find a torus base point via the maximal-gap method.}
 \usage{
 auto_base_point_torus(X)
 }

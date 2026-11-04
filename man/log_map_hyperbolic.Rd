@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{log_map_hyperbolic}
 \alias{log_map_hyperbolic}
-\title{Map hyperbolic data to the tangent space at a base point}
+\title{Map hyperbolic data to the tangent space at a base point.}
 \usage{
 log_map_hyperbolic(X, p)
 }

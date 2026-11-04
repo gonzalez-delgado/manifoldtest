@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{exp_map_grassmann}
 \alias{exp_map_grassmann}
-\title{Map tangent vectors to the Grassmann manifold}
+\title{Map tangent vectors to the Grassmann manifold.}
 \usage{
 exp_map_grassmann(V, p, n = nrow(p), k = ncol(p))
 }

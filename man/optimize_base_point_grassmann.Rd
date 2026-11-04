@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-grassmann.R
 \name{optimize_base_point_grassmann}
 \alias{optimize_base_point_grassmann}
-\title{Find a Grassmann base point via multi-start optimization}
+\title{Find a Grassmann base point via multi-start optimization.}
 \usage{
 optimize_base_point_grassmann(X, n, k, n_start = 10, maxit = 200, seed = 42)
 }

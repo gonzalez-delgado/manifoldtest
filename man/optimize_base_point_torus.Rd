@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{optimize_base_point_torus}
 \alias{optimize_base_point_torus}
-\title{Find a torus base point via multi-start optimization}
+\title{Find a torus base point via multi-start optimization.}
 \usage{
 optimize_base_point_torus(X, n_start = 10, maxit = 200, seed = 42)
 }

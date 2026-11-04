@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-hyperbolic.R
 \name{optimize_base_point_hyperbolic}
 \alias{optimize_base_point_hyperbolic}
-\title{Find a hyperbolic base point via multi-start optimization}
+\title{Find a hyperbolic base point via multi-start optimization.}
 \usage{
 optimize_base_point_hyperbolic(X, n_start = 10, maxit = 200, seed = 42)
 }

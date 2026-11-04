@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{log_map_torus}
 \alias{log_map_torus}
-\title{Map torus data to the tangent space at a base point}
+\title{Map torus data to the tangent space at a base point.}
 \usage{
 log_map_torus(X, p)
 }

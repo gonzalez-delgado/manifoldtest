@@ -2,7 +2,7 @@
 % Please edit documentation in R/util.R
 \name{optimize_base_point}
 \alias{optimize_base_point}
-\title{Find a base point via multi-start optimization}
+\title{Find a base point via multi-start optimization.}
 \usage{
 optimize_base_point(
   X,

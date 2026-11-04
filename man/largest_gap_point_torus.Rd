@@ -2,7 +2,7 @@
 % Please edit documentation in R/manifold-torus.R
 \name{largest_gap_point_torus}
 \alias{largest_gap_point_torus}
-\title{Midpoint of the largest gap on the circle [0,1)}
+\title{Midpoint of the largest gap on the circle [0,1).}
 \usage{
 largest_gap_point_torus(values)
 }

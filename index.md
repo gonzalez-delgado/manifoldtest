@@ -1,4 +1,4 @@
-# manifoldtest: Independence Testing for Manifold-Valued Data
+# manifoldtest: Independence test on Riemannian manifolds
 
 `manifoldtest` is an R package for testing statistical independence between two samples of data lying on a Riemannian manifold. Each sample is mapped to a Euclidean tangent space via the logarithmic (inverse exponential) map at a chosen base point, optionally transformed to multidimensional ranks bounded in the unit ball via the center-outward distribution function of Hallin et al. (2021), and then tested for independence with the distance covariance test of Székely, Rizzo and Bakirov (2007).
 
@@ -47,7 +47,7 @@ If you use `manifoldtest`, please cite:
 ### The R package
 
 Li, M. and González-Delgado, J. (2026).  
-*manifoldtest: Independence testing for manifold-valued data*.  
+*manifoldtest: Independence test on Riemannian manifolds*.  
 R package version 1.0.0. <a href="https://github.com/gonzalez-delgado/manifoldtest" target="_blank">GitHub repository</a>
 
 <details class="citation-details">
@@ -55,7 +55,7 @@ R package version 1.0.0. <a href="https://github.com/gonzalez-delgado/manifoldte
 
 ```bibtex
 @Manual{manifoldtest2026,
-  title   = {manifoldtest: Independence testing for manifold-valued data},
+  title   = {manifoldtest: Independence test on Riemannian manifolds},
   author  = {Li, Mingyu and González-Delgado, Javier},
   year    = {2026},
   note    = {R package version 1.0.0},
