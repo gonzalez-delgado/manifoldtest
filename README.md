@@ -13,7 +13,7 @@ devtools::install_github("gonzalez-delgado/manifoldtest")
 
 ## User guide
 
-A comprehensive user guide for `manifoldtest`, including tutorials and illustrative examples, is available at <https://gonzalez-delgado.github.io/manifoldtest/>.
+A comprehensive user guide for $\texttt{manifoldtest}$, including tutorials and illustrative examples, is available at <https://gonzalez-delgado.github.io/manifoldtest/>.
 
 ## Examples
 
