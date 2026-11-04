@@ -1,6 +1,6 @@
-# manifoldtest <img src="man/figures/logo.png" align="right" height="139" alt="" />
+# About `manifoldtest` <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
-Independence test on Riemannian manifolds.
+`manifoldtest` is an R package to perform independence tests on manifold-valued data. It currently supports data on the $d$-dimensional flat torus, the $d$-dimensional hyperbolic space and the Grassmann manifold $\mathrm{Gr}(n, k)$ of $k$-dimensional linear subspaces of $\mathbb{R}^n$. Tests can also be performed on any other manifold by providing its logarithmic map and geodesic distance, together with a few helper functions (see the user guide).
 
 ## Installation
 
@@ -13,7 +13,7 @@ devtools::install_github("gonzalez-delgado/manifoldtest")
 
 ## User guide
 
-The package documentation is available at <https://gonzalez-delgado.github.io/manifoldtest/>.
+A comprehensive user guide for `manifoldtest`, including tutorials and illustrative examples, is available at <https://gonzalez-delgado.github.io/manifoldtest/>.
 
 ## Examples
 
