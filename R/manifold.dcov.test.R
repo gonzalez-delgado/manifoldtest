@@ -6,13 +6,16 @@
 #' runs a distance covariance permutation test to assess independence
 #' between them.
 #'
-#' @param X A matrix or data frame of data on \code{manifold} (for the
-#'   torus, in \eqn{[0,1)^d}); rows are samples, columns are coordinates.
+#' @param X A matrix or data frame of data on \code{manifold}, in its
+#'   representation (for the torus, rows in \eqn{[0,1)^d}; for hyperbolic
+#'   space, rows on the hyperboloid; for the Grassmann manifold, flattened
+#'   Stiefel matrices); rows are samples, columns are coordinates.
 #' @param Y A matrix or data frame of data on \code{manifold}, analogous
 #'   to \code{X}.
 #' @param manifold The manifold \code{X} and \code{Y} lie on: a name
-#'   accepted by \code{\link{get_manifold}} (currently only \code{"torus"},
-#'   the default) or an object created with \code{\link{new_manifold}}.
+#'   accepted by \code{\link{get_manifold}} (\code{"torus"}, the default, or
+#'   \code{"hyperbolic"}) or a manifold object, such as
+#'   \code{\link{manifold_grassmann}(n, k)}.
 #' @param px_base Base point used to map \code{X} to the tangent space. If
 #'   \code{NULL} (the default) or not valid for \code{X} according to the
 #'   manifold's cut-locus check (e.g. \code{\link{is_valid_torus}}), a base
@@ -38,8 +41,8 @@
 #' @param base_point_method Base point method, passed as \code{method} to
 #'   \code{\link{choose_base_point}} for any base point that must be
 #'   chosen automatically. If \code{NULL} (the default), the manifold's
-#'   default method is used. For the torus: \code{"auto"} (the default,
-#'   closed-form maximal-gap method) or \code{"optimize"} (numerical,
+#'   default method is used. Every built-in manifold offers \code{"auto"}
+#'   (the default, closed form) and \code{"optimize"} (numerical,
 #'   data-centered). See \code{\link{choose_base_point}}.
 #' @param n_start Number of random restarts passed to
 #'   \code{\link{choose_base_point}}. Only used by iterative methods such

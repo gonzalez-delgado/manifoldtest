@@ -71,16 +71,21 @@ new_manifold <- function(name, representation, contains, log_map, dist,
 # write its functions and constructor (see new_manifold) in
 # R/manifold-<name>.R and add one entry here. 
 manifold_registry <- list(
-    torus = function() manifold_torus()
+    torus = function() manifold_torus(),
+    hyperbolic = function() manifold_hyperbolic()
 )
+
+# Manifolds that need parameters, and so cannot be retrieved by name alone
+manifold_parametric <- c(grassmann = "manifold_grassmann(n, k)")
 
 #' Retrieve a manifold by name
 #'
 #' Resolves the \code{manifold} argument of \code{\link{manifold.dcov.test}}
 #' and \code{\link{choose_base_point}}.
 #'
-#' @param manifold Either the name of a supported manifold (currently only
-#'   \code{"torus"}), or an object created with \code{\link{new_manifold}},
+#' @param manifold Either the name of a supported manifold
+#'   (\code{"torus"} or \code{"hyperbolic"}), or an object created with
+#'   \code{\link{new_manifold}}, e.g. by \code{\link{manifold_grassmann}},
 #'   which is returned unchanged.
 #'
 #' @return An object of class \code{"manifold"}.
@@ -95,6 +100,10 @@ get_manifold <- function(manifold) {
 
     if (!is.character(manifold) || length(manifold) != 1) {
         stop("manifold must be a single character string or an object created with new_manifold().")
+    }
+    if (manifold %in% names(manifold_parametric)) {
+        stop(sprintf("The %s manifold needs parameters: pass manifold = %s instead of its name.",
+                     manifold, manifold_parametric[[manifold]]))
     }
     if (!manifold %in% names(manifold_registry)) {
         stop(sprintf("Unknown manifold '%s'. Available manifolds: %s.",

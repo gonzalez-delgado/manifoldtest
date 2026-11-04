@@ -5,6 +5,10 @@ test_that("get_manifold resolves names and passes manifold objects through", {
   expect_identical(get_manifold(m), m)
 })
 
+test_that("get_manifold retrieves hyperbolic space by name", {
+  expect_equal(get_manifold("hyperbolic")$name, "hyperbolic")
+})
+
 test_that("get_manifold rejects unknown or malformed manifolds", {
   expect_error(get_manifold("sphere"), "Unknown manifold 'sphere'")
   expect_error(get_manifold(c("torus", "torus")), "single character string")

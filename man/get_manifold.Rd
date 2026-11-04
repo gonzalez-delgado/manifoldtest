@@ -7,8 +7,9 @@
 get_manifold(manifold)
 }
 \arguments{
-\item{manifold}{Either the name of a supported manifold (currently only
-\code{"torus"}), or an object created with \code{\link{new_manifold}},
+\item{manifold}{Either the name of a supported manifold
+(\code{"torus"} or \code{"hyperbolic"}), or an object created with
+\code{\link{new_manifold}}, e.g. by \code{\link{manifold_grassmann}},
 which is returned unchanged.}
 }
 \value{

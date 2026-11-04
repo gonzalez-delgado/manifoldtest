@@ -34,6 +34,8 @@ reference:
   - new_manifold
   - get_manifold
   - manifold_torus
+  - manifold_hyperbolic
+  - manifold_grassmann
 - subtitle: Base point selection
   desc: Manifold-agnostic choice of the base point of the logarithmic map.
   contents:
@@ -49,6 +51,26 @@ reference:
   - auto_base_point_torus
   - optimize_base_point_torus
   - largest_gap_point_torus
+- subtitle: Hyperbolic space
+  desc: Geometry of the hyperbolic space in the hyperboloid model.
+  contents:
+  - is_in_hyperbolic
+  - log_map_hyperbolic
+  - exp_map_hyperbolic
+  - dist_hyperbolic
+  - is_valid_hyperbolic
+  - auto_base_point_hyperbolic
+  - optimize_base_point_hyperbolic
+- subtitle: Grassmann manifold
+  desc: Geometry of the Grassmann manifold Gr(n, k), with points represented by Stiefel matrices.
+  contents:
+  - is_in_grassmann
+  - log_map_grassmann
+  - exp_map_grassmann
+  - dist_grassmann
+  - is_valid_grassmann
+  - auto_base_point_grassmann
+  - optimize_base_point_grassmann
 - subtitle: Center-outward transform
   desc: Multidimensional ranks in the unit ball (Hallin et al. 2021).
   contents:

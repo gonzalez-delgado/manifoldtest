@@ -18,8 +18,9 @@ choose_base_point(
 columns are coordinates.}
 
 \item{manifold}{The manifold \code{X} lies on: a name accepted by
-\code{\link{get_manifold}} (currently only \code{"torus"}, the
-default) or an object created with \code{\link{new_manifold}}.}
+\code{\link{get_manifold}} (\code{"torus"}, the default, or
+\code{"hyperbolic"}) or a manifold object, such as
+\code{\link{manifold_grassmann}(n, k)}.}
 
 \item{method}{Name of one of the manifold's base point methods. If
 \code{NULL} (the default), the manifold's first (default) method is
@@ -71,6 +72,15 @@ cut-locus check (\code{is_valid}). For the torus
     Cut-locus avoidance is checked afterward, not guaranteed by
     construction.
 }
+For hyperbolic space (\code{\link{manifold_hyperbolic}}), \code{"auto"}
+is the Lorentzian centroid (\code{\link{auto_base_point_hyperbolic}}) and
+\code{"optimize"} minimizes the total hyperbolic distance
+(\code{\link{optimize_base_point_hyperbolic}}); there is no cut locus.
+For the Grassmann manifold (\code{\link{manifold_grassmann}}),
+\code{"auto"} is the projection mean
+(\code{\link{auto_base_point_grassmann}}) and \code{"optimize"} minimizes
+the total Grassmann distance
+(\code{\link{optimize_base_point_grassmann}}).
 }
 \examples{
 X <- matrix(stats::runif(20), nrow = 10, ncol = 2)

@@ -3,13 +3,13 @@ Type: Package
 Title: Independence Testing for Manifold-Valued Data
 Version: 1.0.0
 Authors@R: c(
+    person("Mingyu", "Li", role = "aut"),
     person("Javier", "González-Delgado", email = "javiergonde@gmail.com",
-           role = c("aut", "cre")),
-    person("Mingyu", "Li", role = "aut"))
+           role = c("aut", "cre")))
 Description: Tools for testing statistical independence between samples of
-    manifold-valued data (currently the flat torus, e.g. angular or periodic
-    measurements). Data are mapped from the manifold to a Euclidean
-    tangent space via a
+    manifold-valued data: currently the flat torus (e.g. angular or periodic
+    measurements), hyperbolic space and the Grassmann manifold. Data are
+    mapped from the manifold to a Euclidean tangent space via a
     logarithmic (inverse exponential) map at a chosen base point, optionally
     transformed to multidimensional ranks bounded in the unit ball via the
     center-outward distribution function of Hallin et al. (2021), and then
