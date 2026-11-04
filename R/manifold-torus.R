@@ -70,10 +70,10 @@ is_in_torus <- function(X) {
 #' Map torus data to the tangent space at a base point
 #'
 #' Applies the logarithmic map to send torus data in \eqn{[0,1)^d}
-#' into the tangent space \eqn{(-0.5, 0.5]^d} at base point \code{p}: for
+#' into the tangent space \eqn{[-0.5, 0.5)^d} at base point \code{p}: for
 #' each coordinate, \code{(x - p + 0.5) \%\% 1 - 0.5}, i.e. the shortest
 #' signed offset from \code{p} on that coordinate's circle. Points on the
-#' cut locus of \code{p} map to the boundary of \eqn{(-0.5, 0.5]^d}; see
+#' cut locus of \code{p} map to \code{-0.5} in the affected coordinates; see
 #' \code{\link{is_valid_torus}}.
 #'
 #' @param X A matrix or data frame of torus data in \eqn{[0,1)^d}; rows are
@@ -82,7 +82,7 @@ is_in_torus <- function(X) {
 #'   torus.
 #'
 #' @return A numeric matrix of the same shape as \code{X}, with values in
-#'   \eqn{(-0.5, 0.5]^d}.
+#'   \eqn{[-0.5, 0.5)^d}.
 #'
 #' @examples
 #' X <- matrix(runif(20), nrow = 10, ncol = 2)

@@ -31,11 +31,12 @@ align_sample_sizes <- function(X_raw, Y_raw, seed = 2024) {
     
         message(sprintf("Warning: The sample size of X (%d) is inconsistent with that of Y (%d), and will be automatically aligned to the smaller value. \n", n_X, n_Y))
         n_min <- min(n_X, n_Y)
-        set.seed(seed)
-    
-        # Randomly remove redundant samples
-        idx_X <- sample(1:n_X, n_min)
-        idx_Y <- sample(1:n_Y, n_min)
+
+        # Randomly remove redundant samples, leaving the global RNG untouched
+        withr::with_seed(seed, {
+            idx_X <- sample(1:n_X, n_min)
+            idx_Y <- sample(1:n_Y, n_min)
+        })
         X <- X_raw[idx_X, , drop = FALSE]
         Y <- Y_raw[idx_Y, , drop = FALSE]
         message(sprintf("Sample size after alignment: %d\n", n_min))
@@ -63,7 +64,8 @@ align_sample_sizes <- function(X_raw, Y_raw, seed = 2024) {
 #'   distances between each row of \code{X} and \code{p} (see
 #'   \code{\link{new_manifold}}).
 #' @param init Function \code{f(n)} returning a matrix whose \code{n} rows
-#'   are the restart points. It is called after \code{set.seed(seed)}.
+#'   are the restart points. It is called with the random seed set to
+#'   \code{seed}, without altering the global random number generator.
 #' @param in_domain Function \code{f(p)} returning \code{TRUE} if \code{p}
 #'   is an admissible candidate; the objective is \code{Inf} otherwise.
 #'   Defaults to accepting every \code{p}.
@@ -109,8 +111,7 @@ optimize_base_point <- function(X, dist, init, in_domain = function(p) TRUE,
     best_val <- Inf
     best_convergence <- NA_integer_
 
-    set.seed(seed)
-    init_points <- as.matrix(init(n_start))
+    init_points <- as.matrix(withr::with_seed(seed, init(n_start)))
     if (nrow(init_points) != n_start) {
         stop(sprintf("init(%d) returned %d restart points instead of %d.", n_start, nrow(init_points), n_start))
     }

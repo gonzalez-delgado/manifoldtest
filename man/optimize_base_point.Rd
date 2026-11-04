@@ -26,7 +26,8 @@ distances between each row of \code{X} and \code{p} (see
 \code{\link{new_manifold}}).}
 
 \item{init}{Function \code{f(n)} returning a matrix whose \code{n} rows
-are the restart points. It is called after \code{set.seed(seed)}.}
+are the restart points. It is called with the random seed set to
+\code{seed}, without altering the global random number generator.}
 
 \item{in_domain}{Function \code{f(p)} returning \code{TRUE} if \code{p}
 is an admissible candidate; the objective is \code{Inf} otherwise.

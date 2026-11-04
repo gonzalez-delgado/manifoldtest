@@ -48,9 +48,9 @@ build_ball_grid <- function(n, d, nR, nS, n0, seed = 42) {
     }
   } else {
     # Quasi-uniform directions via normalised Gaussian draws (OT2.R);
-    # fixed seed makes the grid reproducible for a given (nS, d)
-    set.seed(seed + nS)
-    UU <- matrix(stats::rnorm(nS * d), nS, d)
+    # fixed seed makes the grid reproducible for a given (nS, d), and is
+    # applied locally so the global RNG state is left untouched
+    UU <- withr::with_seed(seed + nS, matrix(stats::rnorm(nS * d), nS, d))
     UU <- UU / sqrt(rowSums(UU^2))
     U  <- t(UU)
   }
@@ -64,8 +64,9 @@ build_ball_grid <- function(n, d, nR, nS, n0, seed = 42) {
   direction_Grid <- cbind(matrix(0, d, n0),
                           matrix(rep(U, nR), nrow = d))
 
-  # Grid points = length * direction  (d x n), transpose to n x d
-  return(t(length_Grid * direction_Grid))
+  # Grid points = length * direction: scale each column (point) by its own
+  # radius (d x n), transpose to n x d
+  return(t(sweep(direction_Grid, 2, length_Grid, "*")))
 }
 
 #' Solve the optimal L2 assignment between data and grid

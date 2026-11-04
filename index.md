@@ -46,9 +46,9 @@ If you use `manifoldtest`, please cite:
 
 ### The R package
 
-González-Delgado, J. (2026).  
+González-Delgado, J. and Li, M. (2026).  
 *manifoldtest: Independence testing for manifold-valued data*.  
-R package version 0.1.0. <a href="https://github.com/gonzalez-delgado/manifoldtest" target="_blank">GitHub repository</a>
+R package version 1.0.0. <a href="https://github.com/gonzalez-delgado/manifoldtest" target="_blank">GitHub repository</a>
 
 <details class="citation-details">
 <summary>BibTeX</summary>
@@ -56,9 +56,9 @@ R package version 0.1.0. <a href="https://github.com/gonzalez-delgado/manifoldte
 ```bibtex
 @Manual{manifoldtest2026,
   title   = {manifoldtest: Independence testing for manifold-valued data},
-  author  = {González-Delgado, Javier},
+  author  = {Li, Mingyu and González-Delgado, Javier},
   year    = {2026},
-  note    = {R package version 0.1.0},
+  note    = {R package version 1.0.0},
   url     = {https://github.com/gonzalez-delgado/manifoldtest}
 }
 ```
