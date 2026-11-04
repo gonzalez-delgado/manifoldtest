@@ -263,3 +263,26 @@ body:not(:has(.container.template-home)) .navbar-brand img.navbar-logo {
   margin-bottom: 0;
   color: #5f6b76;
 }
+
+/* Colored note box for articles: wrap Markdown in ::: {.callout} ... ::: */
+.callout {
+  border-left: 4px solid #3b82c4;
+  background: #eef5ff;
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.callout > :first-child {
+  margin-top: 0;
+}
+
+.callout > :last-child {
+  margin-bottom: 0;
+}
+
+.callout h3,
+.callout h4 {
+  font-size: 1.1rem;
+  color: #1f5a92;
+}

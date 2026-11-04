@@ -8,7 +8,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 `manifoldtest` tests whether two samples of data lying on Riemannian
 manifolds are independent. Everything is done by a single function,
-`manifold.dcov.test()`. This guide explains how to use it, shows short
+[`manifold.dcov.test()`](../reference/manifold.dcov.test.html). This guide explains how to use it, shows short
 examples on each of the manifolds available in the package, and explains how
 to add a new manifold.
 
@@ -20,50 +20,39 @@ library(manifoldtest)
 
 Given paired observations $(X_i, Y_i)$, $i = 1, \ldots, N$, where each $X_i$
 lies on a manifold $M_1$ and each $Y_i$ on a manifold $M_2$,
-`manifold.dcov.test()` tests the null hypothesis that $X$ and $Y$ are
+[`manifold.dcov.test()`](../reference/manifold.dcov.test.html) tests the null hypothesis that $X$ and $Y$ are
 independent. It proceeds in four steps:
 
 1. **Base point.** A point $p$ of $M_1$ (and $q$ of $M_2$) is chosen near the
-   data. You can supply it, or let the package choose it.
+   data. The user can supply it, or let the package choose it.
 2. **Logarithmic map.** Each sample is mapped from the manifold to the tangent
    space at its base point, which is a usual Euclidean space $\mathbb{R}^d$.
-   This map preserves the distances to the base point.
 3. **Center-outward ranks** (optional, off by default). The mapped data are
    replaced by their multidimensional ranks, which lie in the unit ball. This
    makes the test robust to outliers and valid without moment conditions.
-   With this step, the test is the **RankCov** test of the paper; without
-   it, it is the **DistCov** test.
+   Using the center-outward ranks corresponds to the **RankCov** test presented
+   in the paper. Otherwise, the **DistCov** test is performed.
 4. **Distance covariance test.** The classical distance covariance
    permutation test is applied to the transformed samples.
 
-A small p-value is evidence that $X$ and $Y$ are dependent.
-
 ## Using `manifold.dcov.test()`
 
-### 1. Put your data in the right format
+### 1. Data formatting
 
-Each sample is a matrix (or data frame) with **one row per observation**. Rows
-of `X` and `Y` with the same index are paired. Each row must represent a point
-of the manifold, in the format the package expects. Three manifolds are
-implemented:
+Each sample is a matrix (or data frame) with one row per observation. 
+Each row must represent a point of the manifold, in the format the package expects.
+Three manifolds are implemented:
 
 | Manifold | `manifold =` | One observation (row) |
 |---|---|---|
 | Flat torus $\mathbb{T}^d$ (angles, periodic data) | `"torus"` (default) | $d$ coordinates in $[0, 1)$ |
 | Hyperbolic space $\mathbb{H}^d$ | `"hyperbolic"` | $d + 1$ coordinates $(x_0, \ldots, x_d)$ on the hyperboloid $-x_0^2 + x_1^2 + \cdots + x_d^2 = -1$, $x_0 > 0$ |
-| Grassmann manifold $\mathrm{Gr}(n, k)$ ($k$-dimensional subspaces of $\mathbb{R}^n$) | `manifold_grassmann(n, k)` | `as.vector(U)`, of length $nk$, for an $n \times k$ matrix $U$ with orthonormal columns spanning the subspace |
-
-For instance, angles measured in degrees become torus data after dividing by
-360 and taking the remainder modulo 1: `(angles / 360) %% 1`. The functions
-`exp_map_hyperbolic()` and `exp_map_grassmann()` build points of the other two
-manifolds from Euclidean coordinates, which is useful for simulations.
+| Grassmann manifold $\mathrm{Gr}(n, k)$ ($k$-dimensional subspaces of $\mathbb{R}^n$) | [`manifold_grassmann(n, k)`](../reference/manifold_grassmann.html) | `as.vector(U)`, of length $nk$, for an $n \times k$ matrix $U$ with orthonormal columns spanning the subspace |
 
 `X` and `Y` must lie on the same kind of manifold, but their dimensions can
 differ: for instance, `X` on the 2-torus (two angles) and `Y` on the circle
 (one angle). For one-dimensional data, such as a single angle, `X` or `Y` can
-be a plain vector.
-
-The test checks that the data match the chosen manifold, and stops with an
+be a plain vector. `manifold.dcov.test()` checks that the data match the chosen manifold, and stops with an
 error otherwise.
 
 ### 2. Run the test
@@ -91,9 +80,24 @@ The main arguments are:
 If `X` and `Y` have different numbers of rows, both are randomly subsampled
 to the smaller size, with a message.
 
+::: {.callout}
+### Choosing the base point
+
+By default, the base point is chosen automatically with a fast closed-form
+rule (`base_point_method = "auto"`): the Lorentzian centroid of the data on
+hyperbolic space and their projection mean on the Grassmann manifold, which
+are both central; on the torus, a point chosen coordinate by coordinate so
+that no observation lies on its cut locus. The user can also set
+`base_point_method = "optimize"`, which numerically searches for the point
+minimizing the total geodesic distance to the data.
+
+The base point should lie close to the data: far from it, the power of the
+test can drop substantially (except on flat, simply connected manifolds).
+:::
+ 
 ### 3. Read the result
 
-`manifold.dcov.test()` returns a list with:
+[`manifold.dcov.test()`](../reference/manifold.dcov.test.html) returns a list with:
 
 - `dcov_test`: the test itself; `result$dcov_test$p.value` is the p-value and
   `result$dcov_test$statistic` the test statistic.
@@ -115,21 +119,20 @@ result <- manifold.dcov.test(X, Y, manifold = "torus", R = 199, verbose = FALSE)
 result$dcov_test$p.value
 ```
 
-Now `Y` is a noisy copy of the first angle of `X`. The dependence crosses
-the boundary $0 \equiv 1$ of the circle, which the test handles naturally:
+If `Y` is a noisy copy of the first angle of `X` wrapped back onto the circle,
+dependence is detected:
 
 ```{r torus-dep}
 Y <- (X[, 1] + rnorm(100, sd = 0.05)) %% 1
 
 result <- manifold.dcov.test(X, Y, manifold = "torus", R = 199, verbose = FALSE)
 result$dcov_test$p.value
-result$px_base
 ```
 
 ### Hyperbolic space
 
 Points on $\mathbb{H}^2$ are built from coordinates in $\mathbb{R}^2$ with
-`exp_map_hyperbolic()`. Here `Y` depends on `X`. Hyperbolic space is not
+[`exp_map_hyperbolic()`](../reference/exp_map_hyperbolic.html). Here `Y` depends on `X`. Hyperbolic space is not
 compact, so we use the center-outward ranks, which need no moment condition
 (see [Center-outward ranks or not?](#center-outward-ranks-or-not)):
 
@@ -149,8 +152,8 @@ result$dcov_test$p.value
 
 Points of $\mathrm{Gr}(4, 2)$, planes in $\mathbb{R}^4$, are built from
 $(4 - 2) \times 2 = 4$ tangent coordinates at a reference plane `U0` with
-`exp_map_grassmann()`. Since $n$ and $k$ cannot be deduced from the data, the
-manifold is passed as `manifold_grassmann(4, 2)`:
+[`exp_map_grassmann()`](../reference/exp_map_grassmann.html). Since $n$ and $k$ cannot be deduced from the data, the
+manifold is passed as [`manifold_grassmann(4, 2)`](../reference/manifold_grassmann.html):
 
 ```{r grassmann}
 set.seed(3)
@@ -163,25 +166,6 @@ result <- manifold.dcov.test(X, Y, manifold = manifold_grassmann(4, 2),
                              R = 199, verbose = FALSE)
 result$dcov_test$p.value
 ```
-
-### Choosing the base point
-
-By default, a central base point is chosen automatically. You can also
-compute one with `choose_base_point()`, for instance with the slower
-`"optimize"` method, and pass it to the test:
-
-```{r base-point}
-p <- choose_base_point(X, manifold = manifold_grassmann(4, 2), method = "optimize",
-                       n_start = 3)$p
-q <- choose_base_point(Y, manifold = manifold_grassmann(4, 2))$p
-
-result <- manifold.dcov.test(X, Y, manifold = manifold_grassmann(4, 2),
-                             px_base = p, py_base = q, R = 199, verbose = FALSE)
-result$dcov_test$p.value
-```
-
-The base point should lie close to the data: far from it, the power of the
-test can drop substantially (except on flat, simply connected manifolds).
 
 ## Center-outward ranks or not?
 
@@ -258,6 +242,7 @@ manifold.dcov.test(X, Y, manifold = "hyperbolic", center_outward = TRUE,
   cost about $O(N^2 \log N)$, which becomes slow for samples of many
   thousands of observations.
 
+::: {.callout}
 ### In practice
 
 - Use **DistCov** (the default) when the data are clean, the second-moment
@@ -268,14 +253,15 @@ manifold.dcov.test(X, Y, manifold = "hyperbolic", center_outward = TRUE,
   hyperbolic space, and when the sample is not large. On hyperbolic space,
   running DistCov raises a warning recommending RankCov, as in the example
   above.
+:::
 
 ## Adding new manifolds
 
 The test only interacts with a manifold through a small set of functions,
-bundled into an object by `new_manifold()`. Supporting a new manifold
+bundled into an object by [`new_manifold()`](../reference/new_manifold.html). Supporting a new manifold
 amounts to writing these functions:
 
-| Argument of `new_manifold()` | What it does |
+| Argument of [`new_manifold()`](../reference/new_manifold.html) | What it does |
 |---|---|
 | `name`, `representation` | Name of the manifold, and a description of how a point is stored as a row (used in error messages). |
 | `contains(X)` | `TRUE` if every row of `X` is a point of the manifold. |
@@ -287,10 +273,10 @@ amounts to writing these functions:
 The steps are:
 
 1. Choose how a point is stored as a row of a matrix.
-2. Write the functions above. The generic `optimize_base_point()` can turn
+2. Write the functions above. The generic [`optimize_base_point()`](../reference/optimize_base_point.html) can turn
    `dist` into an `"optimize"` base point method.
-3. Create the manifold with `new_manifold()`, and pass the object as the
-   `manifold` argument of `manifold.dcov.test()` and `choose_base_point()`.
+3. Create the manifold with [`new_manifold()`](../reference/new_manifold.html), and pass the object as the
+   `manifold` argument of [`manifold.dcov.test()`](../reference/manifold.dcov.test.html) and [`choose_base_point()`](../reference/choose_base_point.html).
 
 As an example, here is the unit sphere $S^d \subset \mathbb{R}^{d+1}$, with
 each point stored as a unit vector of length $d + 1$. The logarithmic map at

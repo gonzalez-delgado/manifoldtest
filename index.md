@@ -2,7 +2,7 @@
 
 `manifoldtest` is an R package for testing statistical independence between two samples of data lying on a Riemannian manifold. Each sample is mapped to a Euclidean tangent space via the logarithmic (inverse exponential) map at a chosen base point, optionally transformed to multidimensional ranks bounded in the unit ball via the center-outward distribution function of Hallin et al. (2021), and then tested for independence with the distance covariance test of Székely, Rizzo and Bakirov (2007).
 
-The package currently supports data on the flat torus (e.g. angular or periodic measurements such as dihedral angles), on hyperbolic space (in the hyperboloid model) and on the Grassmann manifold of linear subspaces. It is designed so that new manifolds can be added from their logarithmic map and distance function.
+The package currently supports data on the flat torus (e.g. angular or periodic measurements such as dihedral angles), on hyperbolic space and on the Grassmann manifold of linear subspaces. It is designed so that new manifolds can be added from their logarithmic map and distance function.
 
 ## Installation
 
