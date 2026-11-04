@@ -1,6 +1,6 @@
-# About `manifoldtest` <img src="man/figures/logo.png" align="right" height="139" alt="" />
+# About $\texttt{manifoldtest}$ <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
-`manifoldtest` is an R package to perform independence tests on manifold-valued data. It currently supports data on the $d$-dimensional flat torus, the $d$-dimensional hyperbolic space and the Grassmann manifold $\mathrm{Gr}(n, k)$ of $k$-dimensional linear subspaces of $\mathbb{R}^n$. Tests can also be performed on any other manifold by providing its logarithmic map and geodesic distance, together with a few helper functions (see the user guide).
+$\texttt{manifoldtest}$ is an R package to perform independence tests on manifold-valued data. It currently supports data on the $d$-dimensional flat torus, the $d$-dimensional hyperbolic space and the Grassmann manifold $\mathrm{Gr}(n, k)$ of $k$-dimensional linear subspaces of $\mathbb{R}^n$. Tests can also be performed on any other manifold by providing its logarithmic map and geodesic distance, together with a few helper functions (see the user guide).
 
 ## Installation
 
