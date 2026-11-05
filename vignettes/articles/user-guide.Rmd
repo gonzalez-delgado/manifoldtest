@@ -181,9 +181,6 @@ paper accompanying the package:
   ball, by solving an optimal transport problem: central observations get
   points near the center, outlying ones points near the boundary.
 
-Both tests have exactly the right level (the probability of a false rejection
-is the nominal one), whatever the distribution of the data.
-
 ### Why use center-outward ranks
 
 DistCov has two weaknesses that RankCov removes:
@@ -245,14 +242,13 @@ manifold.dcov.test(X, Y, manifold = "hyperbolic", center_outward = TRUE,
 ::: {.callout}
 ### In practice
 
-- Use **DistCov** (the default) when the data are clean, the second-moment
-  condition holds (always the case on the torus and the Grassmann manifold),
-  when the data are discrete, or in high dimensions.
+- Use **DistCov** (the default) when the data contain no outliers and the
+  distances to the base point have finite second moments (always the case on
+  compact manifolds such as the torus and the Grassmann manifold), when the
+  data are discrete (with ties), or in high dimensions.
 - Use **RankCov** (`center_outward = TRUE`) when heavy tails or outliers are
   a realistic concern, in particular on non-compact manifolds such as
-  hyperbolic space, and when the sample is not large. On hyperbolic space,
-  running DistCov raises a warning recommending RankCov, as in the example
-  above.
+  hyperbolic space, and when the sample is not large. 
 :::
 
 ## Adding new manifolds
@@ -265,7 +261,7 @@ amounts to writing these functions:
 |---|---|
 | `name`, `representation` | Name of the manifold, and a description of how a point is stored as a row (used in error messages). |
 | `contains(X)` | `TRUE` if every row of `X` is a point of the manifold. |
-| `log_map(X, p)` | Logarithmic map at the base point `p`: returns a matrix with one row per row of `X`, holding its coordinates in an **orthonormal basis** of the tangent space at `p`. |
+| `log_map(X, p)` | Logarithmic map at the base point `p`: returns a matrix with one row per row of `X`, holding its coordinates in an orthonormal basis of the tangent space at `p`. |
 | `dist(X, p)` | Geodesic distance from each row of `X` to `p`. |
 | `is_valid(X, p)` | `TRUE` if no row of `X` lies on the cut locus of `p` (where the logarithmic map is not defined), `FALSE` otherwise. It should stop with an error if `p` is not a point of the manifold. |
 | `base_point` | A named list of functions `f(X, ...)` choosing a base point, each returning `list(p = <base point>, convergence = NA)`. The first one is the default. |
@@ -338,3 +334,13 @@ constructor in a file `R/manifold-<name>.R` (see `R/manifold-torus.R` for a
 model), and register the constructor in `manifold_registry` in
 `R/manifold.R`, so that it can also be selected by name, as in
 `manifold = "<name>"`.
+
+::: {.callout}
+### Contributing new manifolds
+
+Users who apply `manifoldtest` to a manifold that is not yet implemented are
+invited to share it by opening a
+[pull request](https://github.com/gonzalez-delgado/manifoldtest/pulls) 
+with the corresponding `R/manifold-<name>.R` file, so that
+other users can benefit from it.
+:::
